@@ -652,19 +652,25 @@ async function showEditor( data ) {
 		sel.removeAllRanges();
 		sel.addRange( range );
 	}
-	 // ★ ここで時刻を表示する
-    const meta = currentMemoId ? getMeta(currentMemoId) : null;
-    if (meta && meta.updatedAt) {
-        timestampEl.textContent = formatDateTime(new Date(meta.updatedAt));
-        timestampEl.classList.add('visible');
-        timestampEl.style.color = '#999';  // 過去の時刻はグレー
-        spinner.classList.remove('blinking');
-        spinner.style.visibility = 'hidden'; // 保存スピナーは止める
-    }
+	 updateTimestamp(currentMemoId);
+
 
 	show( 'editor' );
 	window.scrollTo( 0, 0 );
 }
+// --- タイムスタンプ更新関数 ---
+function updateTimestamp(memoId) {
+    const meta = getMeta(memoId);
+    if (!meta) return;
+
+    // Firestore の updated ではなく、入力中は updatedAt を使う場合
+    const time = meta.updatedAt ? new Date(meta.updatedAt) : new Date(meta.updated);
+    timestampEl.textContent = formatDateTime(time);
+    timestampEl.classList.add('visible');
+    timestampEl.style.color = '#999';
+    spinner.classList.remove('blinking');
+    spinner.style.visibility = 'hidden';
+	}
 
 // let saveTimer = null;
 
@@ -806,6 +812,7 @@ function isLargeSize( bytes = 0 ) {
 }
 //8️⃣ エディターイベント（入力、貼り付け、キーボード操作）
 //タイトル取得
+
 
 const saveIndicator = document.getElementById('saveIndicator');
 const spinner = saveIndicator.querySelector('.spinner');
