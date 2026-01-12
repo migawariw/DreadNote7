@@ -652,6 +652,16 @@ async function showEditor( data ) {
 		sel.removeAllRanges();
 		sel.addRange( range );
 	}
+	 // ★ ここで時刻を表示する
+    const meta = currentMemoId ? getMeta(currentMemoId) : null;
+    if (meta && meta.updatedAt) {
+        timestampEl.textContent = formatDateTime(new Date(meta.updatedAt));
+        timestampEl.classList.add('visible');
+        timestampEl.style.color = '#999';  // 過去の時刻はグレー
+        spinner.classList.remove('blinking');
+        spinner.style.visibility = 'hidden'; // 保存スピナーは止める
+    }
+
 	show( 'editor' );
 	window.scrollTo( 0, 0 );
 }
@@ -796,36 +806,91 @@ function isLargeSize( bytes = 0 ) {
 }
 //8️⃣ エディターイベント（入力、貼り付け、キーボード操作）
 //タイトル取得
+
+const saveIndicator = document.getElementById('saveIndicator');
+const spinner = saveIndicator.querySelector('.spinner');
+const timestampEl = saveIndicator.querySelector('.timestamp');
 let saveTimer = null;
-function debounceSave() {
-    if (!currentMemoId) return;
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => {
-        saveMemo();
-    }, 500); // 500ms 待って保存
+
+function formatDateTime(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const mm = String(date.getMinutes()).padStart(2, '0');
+    const ss = String(date.getSeconds()).padStart(2, '0');
+    return `${y}/${m}/${d} ${hh}:${mm}:${ss}`;
 }
-editor.addEventListener( 'input', debounceSave );
-editor.addEventListener( 'input', () => {
-	if ( !currentMemoId ) return;
 
-	// 各行を取得
-	const lines = editor.innerText.split( '\n' );
+// --- 初期表示：前回の最終編集時刻を表示 ---
+(function initTimestamp() {
+    const meta = currentMemoId ? getMeta(currentMemoId) : null;
+    if (meta && meta.updatedAt) {
+        timestampEl.textContent = formatDateTime(new Date(meta.updatedAt));
+        timestampEl.classList.add('visible');
+        timestampEl.style.color = '#999'; // 過去の時刻はグレー
+        spinner.classList.remove('blinking'); // スピナーは止めておく
+        saveIndicator.classList.remove('hidden'); // 表示
+    }
+})();
 
-	// 最初に文字が含まれる行を探す
-	let title = '';
-	for ( const line of lines ) {
-		const trimmed = line.trim();
-		if ( trimmed ) { // 空行でなければタイトルに
-			title = trimmed;
-			break;
-		}
-	}
+editor.addEventListener('input', () => {
+    if (!currentMemoId) return;
 
-	const meta = getMeta( currentMemoId );
-	if ( meta && meta.title !== title ) {
-		updateMeta( currentMemoId, { title } );
-	}
-} );
+    // タイトル取得（最初の空でない行）
+    const lines = editor.innerText.split('\n');
+    let title = '';
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed) {
+            title = trimmed;
+            break;
+        }
+    }
+
+    // meta 即時更新（UI用）
+    const meta = getMeta(currentMemoId);
+    if (meta) {
+        meta.title = title;
+        meta.updatedAt = new Date().toISOString();
+        meta.size = editor.innerText.length;
+        if (typeof updateMetaUI === 'function') {
+            updateMetaUI(currentMemoId, meta);
+        }
+    }
+
+    // 編集中 → スピナー回す、時刻は過去の最終編集時刻
+		spinner.style.visibility = 'visible';
+    spinner.classList.add('blinking');
+		spinner.classList.remove('completed');
+    if (meta && meta.updatedAt) {
+        timestampEl.textContent = formatDateTime(new Date(meta.updatedAt));
+    }
+    timestampEl.classList.add('visible');
+    timestampEl.style.color = '#999'; // 編集中もグレー
+
+    // debounce 保存
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async () => {
+        await saveMemo();
+        if (meta) {
+            await updateMeta(currentMemoId, {
+                title: meta.title,
+                updatedAt: meta.updatedAt,
+                size: meta.size
+            });
+        }
+
+        // 保存完了 → スピナー止め、時刻を現在時刻に更新
+        spinner.classList.remove('blinking');
+				// spinner.style.display = 'none';
+				spinner.classList.add('completed');
+spinner.style.visibility = 'visible'; // 完了でも表示
+        timestampEl.textContent = formatDateTime(new Date());
+        timestampEl.style.color = '#999'; // 完了後もグレー表示
+
+    }, 500);
+});
 
 // ===== Italic → h2 変換 =====
 editor.addEventListener( 'beforeinput', e => {
