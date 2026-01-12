@@ -15,7 +15,7 @@ body {
 }
 #saveIndicator {
     position: fixed;
-    top: 30px;
+    top: 10px;
     right: 20px;
     display: flex;
     align-items: center;
