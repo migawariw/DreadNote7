@@ -62,7 +62,20 @@ section {
 [hidden] {
 	display: none;
 }
-
+.size-span {
+  font-size: 0.75em;
+  opacity: 0.6;
+  margin-right: 6px;
+  white-space: nowrap;
+}
+.size-warning {
+  color: rgb(255, 0, 0);
+  font-weight: 600;
+}
+#total-size {
+  text-align: right;   /* 数字を右寄せ */
+  /* font-weight: bold;   目立たせたい場合 */
+}
 input,
 button {
 	font-size: 17px;
@@ -396,14 +409,10 @@ body.dark .menu-btn:hover,
 	cursor: pointer;
 }
 #user-icon2 {
-	/* position: absolute; */
-	/* position: fixed; */
     z-index: 10000;
     background: transparent;
 	width: 40px;
 	height: 40px;
-	/* top: 0px; */
-	/* top: 10px; */
 	right: calc((100% - 800px)/2 + 0px); /* 親の右端から16px */
 	border-radius: 50%;
 	cursor: pointer;
