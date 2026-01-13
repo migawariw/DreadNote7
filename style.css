@@ -59,6 +59,22 @@ body.dark #sidebar-toggle {
   background: #000000;
     /* box-shadow: 0 2px 4px rgba(255, 255, 255, 0.2); */
 }
+#hide-sidebar-toggle {
+  position: fixed;
+  top: 0px;
+  left: 10px;
+  z-index: 1101;
+  padding-top: 0;
+  border-radius: 20px;
+  font-size: 33px;
+  background: #ffffff;
+  /* box-shadow: 0 2px 4px rgba(0,0,0,0.2); */
+  cursor: default;
+}
+body.dark #hide-sidebar-toggle {
+  background: #000000;
+    /* box-shadow: 0 2px 4px rgba(255, 255, 255, 0.2); */
+}
 #sidebar-toggle2 {
   position: absolute;
   font-size: 32px;
@@ -213,7 +229,6 @@ li {
 	cursor: default;
 	flex-direction: column; /* これを追加 */
     padding: 8px 12px; /* paddingは最後に書く必要があるらしい*/
-
 }
 
 
@@ -221,6 +236,7 @@ li a {
     flex: 1; /* li 全体を覆う */
     text-decoration: none;
     color: inherit;
+	z-index: 1;
 }
 
 li:hover {

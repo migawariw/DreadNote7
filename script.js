@@ -230,7 +230,7 @@ provider.setCustomParameters( {
 
 document.getElementById( 'google-login' ).onclick = async () => { try { await signInWithPopup( auth, provider ); } catch ( e ) { showToast( "Googleログイン失敗: " + e.message ); } };
 
-document.getElementById( 'logout-btn' ).onclick = () => { userMenu.style.display = 'none'; metaCache = null; signOut( auth ); location.hash = '#login'; }
+document.getElementById( 'logout-btn' ).onclick = () => { closeSidebar(); userMenu.style.display = 'none'; metaCache = null; signOut( auth ); location.hash = '#login'; }
 
 onAuthStateChanged( auth, async user => {
 	// ★ ここで「画面を表示していい」と宣言
@@ -358,7 +358,7 @@ async function loadMemos() {
 	await loadMetaOnce();
 	memoList.innerHTML = '';
 
-metaCache.memos
+	metaCache.memos
 		.filter( m => !m.deleted )
 		.sort( ( a, b ) => b.updated - a.updated )
 		.forEach( m => {
@@ -384,9 +384,9 @@ metaCache.memos
 			link.onclick = e => {
 				e.preventDefault();
 				location.hash = `#/editor/${m.id}`;
-				setTimeout(() => {
-        closeSidebar();
-    }, 100);
+				setTimeout( () => {
+					closeSidebar();
+				}, 100 );
 			};
 			li.appendChild( link );
 
@@ -466,10 +466,20 @@ metaCache.memos
 			pinCancelBtn.style.zIndex = '10';
 			pinCancelBtn.style.marginLeft = '4px';
 
+			const pinRemoveBtn = document.createElement( 'button' );
+			pinRemoveBtn.textContent = 'ピン解除';
+			pinRemoveBtn.style.display = 'none';
+			pinRemoveBtn.style.position = 'absolute';
+			pinRemoveBtn.style.zIndex = '10';
+			pinRemoveBtn.style.marginLeft = '4px';
+
+
+
 			// 親要素に追加
 			rightDiv.appendChild( pinInput );
 			rightDiv.appendChild( pinOkBtn );
 			rightDiv.appendChild( pinCancelBtn );
+			rightDiv.appendChild( pinRemoveBtn );
 
 			// 初期値設定（既存のコードはそのまま）
 			pinInput.value = new Date( displayDate ).toLocaleString( 'ja-JP', {
@@ -495,12 +505,18 @@ metaCache.memos
 				pinOkBtn.style.left = left + 60 + 'px';
 
 				pinCancelBtn.style.top = top + 200 + 'px';
-				pinCancelBtn.style.left = left +120+ 'px';
+				pinCancelBtn.style.left = left + 120 + 'px';
+
+				pinRemoveBtn.style.top = top + 250 + 'px';
+				pinRemoveBtn.style.left = left + 60 + 'px';
 
 				const show = pinInput.style.display === 'none';
 				pinInput.style.display = show ? 'inline-block' : 'none';
 				pinOkBtn.style.display = show ? 'inline-block' : 'none';
 				pinCancelBtn.style.display = show ? 'inline-block' : 'none';
+				// 🔹 pinned の時だけ「ピン解除」を表示
+				pinRemoveBtn.style.display =
+					show && m.pinned ? 'inline-block' : 'none';
 
 				if ( show ) pinInput.focus();
 			};
@@ -536,6 +552,23 @@ metaCache.memos
 				pinInput.style.display = 'none';
 				pinOkBtn.style.display = 'none';
 				pinCancelBtn.style.display = 'none';
+				pinRemoveBtn.style.display = 'none';
+			};
+			pinRemoveBtn.onclick = async ( e ) => {
+				e.stopPropagation();
+
+				m.pinned = false;
+				delete m.pinnedDate;
+
+				pinBtn.textContent = '📍';
+
+				await saveMeta();
+				loadMemos();
+
+				pinInput.style.display = 'none';
+				pinOkBtn.style.display = 'none';
+				pinCancelBtn.style.display = 'none';
+				pinRemoveBtn.style.display = 'none';
 			};
 
 			const copyBtn = document.createElement( 'button' );
@@ -569,7 +602,7 @@ metaCache.memos
 					menuPopup.style.display === 'block' ? 'none' : 'block';
 			};
 
-			rightDiv.append( dateSpan,sizeSpan,menuBtn, menuPopup );
+			rightDiv.append( dateSpan, sizeSpan, menuBtn, menuPopup );
 			//aタグの中に右側も入れる
 			li.appendChild( rightDiv );
 			//li に a を追加
@@ -715,7 +748,7 @@ async function showEditor( data ) {
 		sel.removeAllRanges();
 		sel.addRange( range );
 	}
-	 updateTimestamp(currentMemoId);
+	updateTimestamp( currentMemoId );
 
 
 	show( 'editor' );
@@ -723,50 +756,50 @@ async function showEditor( data ) {
 	// closeSidebar();
 }
 // --- タイムスタンプ更新関数 ---
-function updateTimestamp(memoId) {
-    const meta = getMeta(memoId);
-    if (!meta) return;
+function updateTimestamp( memoId ) {
+	const meta = getMeta( memoId );
+	if ( !meta ) return;
 
-    // Firestore の updated ではなく、入力中は updatedAt を使う場合
-    const time = meta.updatedAt ? new Date(meta.updatedAt) : new Date(meta.updated);
-    timestampEl.textContent = formatDateTime(time);
-    timestampEl.classList.add('visible');
-    timestampEl.style.color = '#999';
-    spinner.classList.remove('blinking');
-    spinner.style.visibility = 'hidden';
-	}
+	// Firestore の updated ではなく、入力中は updatedAt を使う場合
+	const time = meta.updatedAt ? new Date( meta.updatedAt ) : new Date( meta.updated );
+	timestampEl.textContent = formatDateTime( time );
+	timestampEl.classList.add( 'visible' );
+	timestampEl.style.color = '#999';
+	spinner.classList.remove( 'blinking' );
+	spinner.style.visibility = 'hidden';
+}
 
 // let saveTimer = null;
 
 let prevHash = location.hash;
 let ignoreNextHashChange = false;
 
-window.addEventListener('hashchange', (e) => {
-    if (ignoreNextHashChange) {
-        ignoreNextHashChange = false;
-        prevHash = location.hash; // ここは新しいhashで更新
-        return;
-    }
+window.addEventListener( 'hashchange', ( e ) => {
+	if ( ignoreNextHashChange ) {
+		ignoreNextHashChange = false;
+		prevHash = location.hash; // ここは新しいhashで更新
+		return;
+	}
 
-    const newHash = location.hash;
+	const newHash = location.hash;
 
-    if (prevHash === '#/editor/new') {
-        const ok = confirm('なくなっていいorサイドバーに残ってたらOK');
-        if (!ok) {
-            // キャンセルなら元のハッシュに戻す
-            ignoreNextHashChange = true; // 再発火を無視
-            location.hash = prevHash;
-            return;
-        }
-    }
+	if ( prevHash === '#/editor/new' ) {
+		const ok = confirm( 'なくなっていいorサイドバーに残ってたらOK' );
+		if ( !ok ) {
+			// キャンセルなら元のハッシュに戻す
+			ignoreNextHashChange = true; // 再発火を無視
+			location.hash = prevHash;
+			return;
+		}
+	}
 
-    // 通常のナビゲーション
-    if (auth.currentUser) {
-        navigate();
-    }
+	// 通常のナビゲーション
+	if ( auth.currentUser ) {
+		navigate();
+	}
 
-    prevHash = newHash;
-});
+	prevHash = newHash;
+} );
 //7️⃣-2 メモ関連の処理の関数（loadMeta, loadMemos, openEditor, saveMemo, updateMeta など）
 async function saveMemo() {
 	if ( !currentMemoId ) return;
@@ -857,19 +890,19 @@ async function fixSizesOnce() {
 	}
 }
 
-function formatSize(bytes = 0) {
-    const kb = Math.max(0, Math.floor(bytes / 1024));
+function formatSize( bytes = 0 ) {
+	const kb = Math.max( 0, Math.floor( bytes / 1024 ) );
 
-    if (kb <= 10) {
-        // 10KB以下は文字数で表示（1文字=1バイト換算）
-        return bytes + ' bytes';
-    }
+	if ( kb <= 10 ) {
+		// 10KB以下は文字数で表示（1文字=1バイト換算）
+		return bytes + ' bytes';
+	}
 
-    if (kb >= 1024) {
-        return (kb / 1024).toFixed(2) + ' MB';
-    }
+	if ( kb >= 1024 ) {
+		return ( kb / 1024 ).toFixed( 2 ) + ' MB';
+	}
 
-    return kb + ' KB';
+	return kb + ' KB';
 }
 function isLargeSize( bytes = 0 ) {
 	return bytes >= 700 * 1024;
@@ -878,90 +911,90 @@ function isLargeSize( bytes = 0 ) {
 //タイトル取得
 
 
-const saveIndicator = document.getElementById('saveIndicator');
-const spinner = saveIndicator.querySelector('.spinner');
-const timestampEl = saveIndicator.querySelector('.timestamp');
+const saveIndicator = document.getElementById( 'saveIndicator' );
+const spinner = saveIndicator.querySelector( '.spinner' );
+const timestampEl = saveIndicator.querySelector( '.timestamp' );
 let saveTimer = null;
 
-function formatDateTime(date) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    const hh = String(date.getHours()).padStart(2, '0');
-    const mm = String(date.getMinutes()).padStart(2, '0');
-    const ss = String(date.getSeconds()).padStart(2, '0');
-    return `${y}/${m}/${d} ${hh}:${mm}:${ss}`;
+function formatDateTime( date ) {
+	const y = date.getFullYear();
+	const m = String( date.getMonth() + 1 ).padStart( 2, '0' );
+	const d = String( date.getDate() ).padStart( 2, '0' );
+	const hh = String( date.getHours() ).padStart( 2, '0' );
+	const mm = String( date.getMinutes() ).padStart( 2, '0' );
+	const ss = String( date.getSeconds() ).padStart( 2, '0' );
+	return `${y}/${m}/${d} ${hh}:${mm}:${ss}`;
 }
 
 // --- 初期表示：前回の最終編集時刻を表示 ---
-(function initTimestamp() {
-    const meta = currentMemoId ? getMeta(currentMemoId) : null;
-    if (meta && meta.updatedAt) {
-        timestampEl.textContent = formatDateTime(new Date(meta.updatedAt));
-        timestampEl.classList.add('visible');
-        timestampEl.style.color = '#999'; // 過去の時刻はグレー
-        spinner.classList.remove('blinking'); // スピナーは止めておく
-        saveIndicator.classList.remove('hidden'); // 表示
-    }
-})();
+( function initTimestamp() {
+	const meta = currentMemoId ? getMeta( currentMemoId ) : null;
+	if ( meta && meta.updatedAt ) {
+		timestampEl.textContent = formatDateTime( new Date( meta.updatedAt ) );
+		timestampEl.classList.add( 'visible' );
+		timestampEl.style.color = '#999'; // 過去の時刻はグレー
+		spinner.classList.remove( 'blinking' ); // スピナーは止めておく
+		saveIndicator.classList.remove( 'hidden' ); // 表示
+	}
+} )();
 
-editor.addEventListener('input', () => {
-    if (!currentMemoId) return;
+editor.addEventListener( 'input', () => {
+	if ( !currentMemoId ) return;
 
-    // タイトル取得（最初の空でない行）
-    const lines = editor.innerText.split('\n');
-    let title = '';
-    for (const line of lines) {
-        const trimmed = line.trim();
-        if (trimmed) {
-            title = trimmed;
-            break;
-        }
-    }
+	// タイトル取得（最初の空でない行）
+	const lines = editor.innerText.split( '\n' );
+	let title = '';
+	for ( const line of lines ) {
+		const trimmed = line.trim();
+		if ( trimmed ) {
+			title = trimmed;
+			break;
+		}
+	}
 
-    // meta 即時更新（UI用）
-    const meta = getMeta(currentMemoId);
-    if (meta) {
-        meta.title = title;
-        meta.updatedAt = new Date().toISOString();
-        meta.size = editor.innerText.length;
-        if (typeof updateMetaUI === 'function') {
-            updateMetaUI(currentMemoId, meta);
-        }
-    }
+	// meta 即時更新（UI用）
+	const meta = getMeta( currentMemoId );
+	if ( meta ) {
+		meta.title = title;
+		meta.updatedAt = new Date().toISOString();
+		meta.size = editor.innerText.length;
+		if ( typeof updateMetaUI === 'function' ) {
+			updateMetaUI( currentMemoId, meta );
+		}
+	}
 
-    // 編集中 → スピナー回す、時刻は過去の最終編集時刻
-		spinner.style.visibility = 'visible';
-    spinner.classList.add('blinking');
-		spinner.classList.remove('completed');
-    if (meta && meta.updatedAt) {
-        timestampEl.textContent = formatDateTime(new Date(meta.updatedAt));
-    }
-    timestampEl.classList.add('visible');
-    timestampEl.style.color = '#999'; // 編集中もグレー
+	// 編集中 → スピナー回す、時刻は過去の最終編集時刻
+	spinner.style.visibility = 'visible';
+	spinner.classList.add( 'blinking' );
+	spinner.classList.remove( 'completed' );
+	if ( meta && meta.updatedAt ) {
+		timestampEl.textContent = formatDateTime( new Date( meta.updatedAt ) );
+	}
+	timestampEl.classList.add( 'visible' );
+	timestampEl.style.color = '#999'; // 編集中もグレー
 
-    // debounce 保存
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(async () => {
-        await saveMemo();
-        if (meta) {
-            await updateMeta(currentMemoId, {
-                title: meta.title,
-                updatedAt: meta.updatedAt,
-                size: meta.size
-            });
-        }
+	// debounce 保存
+	clearTimeout( saveTimer );
+	saveTimer = setTimeout( async () => {
+		await saveMemo();
+		if ( meta ) {
+			await updateMeta( currentMemoId, {
+				title: meta.title,
+				updatedAt: meta.updatedAt,
+				size: meta.size
+			} );
+		}
 
-        // 保存完了 → スピナー止め、時刻を現在時刻に更新
-        spinner.classList.remove('blinking');
-				// spinner.style.display = 'none';
-				spinner.classList.add('completed');
-spinner.style.visibility = 'visible'; // 完了でも表示
-        timestampEl.textContent = formatDateTime(new Date());
-        timestampEl.style.color = '#999'; // 完了後もグレー表示
+		// 保存完了 → スピナー止め、時刻を現在時刻に更新
+		spinner.classList.remove( 'blinking' );
+		// spinner.style.display = 'none';
+		spinner.classList.add( 'completed' );
+		spinner.style.visibility = 'visible'; // 完了でも表示
+		timestampEl.textContent = formatDateTime( new Date() );
+		timestampEl.style.color = '#999'; // 完了後もグレー表示
 
-    }, 500);
-});
+	}, 500 );
+} );
 
 // ===== Italic → h2 変換 =====
 editor.addEventListener( 'beforeinput', e => {
@@ -1416,7 +1449,7 @@ editor.addEventListener( 'keydown', e => {
 } );
 
 /* 9️⃣ ナビゲーション・新規作成ボタン*/
-document.getElementById( 'go-trash' ).onclick = () => { location.hash = '#/trash'; closeSidebar();}
+document.getElementById( 'go-trash' ).onclick = () => { location.hash = '#/trash'; closeSidebar(); }
 document.getElementById( 'back-list' ).onclick = () => { location.hash = '#/list'; }
 document.getElementById( 'back' ).onclick = () => { if ( history.length > 1 ) history.back(); else location.hash = '#/list'; }
 /* New memo button */
@@ -1467,10 +1500,10 @@ async function navigate() {
 		show( 'trash' );
 		loadTrash();
 
-// ★ Empty Trash ボタンの設定 ★
+		// ★ Empty Trash ボタンの設定 ★
 		const emptyTrashBtn = document.getElementById( 'empty-trash-btn' );
 		if ( emptyTrashBtn ) {
-  emptyTrashBtn.onclick = async () => {
+			emptyTrashBtn.onclick = async () => {
 				if ( !metaCache || !Array.isArray( metaCache.memos ) ) return;
 
 				// ★ 確認ダイアログ ★
@@ -1486,11 +1519,11 @@ async function navigate() {
 
 				// meta からも削除
 				metaCache.memos = metaCache.memos.filter( m => !m.deleted );
-			await saveMeta();
+				await saveMeta();
 
-    loadTrash();
+				loadTrash();
 				showToast( 'Trash emptied' );
-  };
+			};
 		}
 
 	} else {
