@@ -8,7 +8,75 @@ body {
 	max-width: 100%;
 	overflow-x: hidden;
 }
+#memo-list li.active {
+    background-color: rgb(240, 240, 240); /* 好きな色に変更 */
+    border-left: 4px solid #0071e3; /* 左ラインで強調 */
+}
+body.dark #memo-list li.active {
+	background-color: rgb(28, 28, 28);
+}
+#sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom:0;
+  width: 300px;
+  height: 100dvh;
+  background: #f9f9f9;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+  z-index: 1300;
+  padding-right: 10px ;
+  padding-bottom: env(safe-area-inset-bottom); /* タブバー回避 */
+    border-radius: 10px;       /* ← ここが丸くするポイント */
+  box-shadow: 2px 0 8px rgba(0,0,0,0.2);  /* 立体感用 */
+}
+body.dark #sidebar{
+	background: black;
+}
 
+#sidebar.show {
+  transform: translateX(0);
+}
+
+
+#sidebar-toggle {
+  position: fixed;
+  top: 0px;
+  left: 10px;
+  z-index: 1100;
+  padding-top: 0;
+  border-radius: 20px;
+  font-size: 32px;
+  background: #ffffff;
+  /* box-shadow: 0 2px 4px rgba(0,0,0,0.2); */
+}
+
+body.dark #sidebar-toggle {
+  background: #000000;
+    /* box-shadow: 0 2px 4px rgba(255, 255, 255, 0.2); */
+}
+#sidebar-toggle2 {
+  position: absolute;
+  font-size: 32px;
+  top: 10px;
+  left: 10px;
+  z-index: 1100;
+  padding-top: 0;
+  /* border-radius: 20px; */
+  background: #f9f9f9;
+  /* box-shadow: 0 2px 4px rgba(0,0,0,0.2); */
+}
+
+body.dark #sidebar-toggle2 {
+  background: #000000;
+    /* box-shadow: 0 2px 4px rgba(255, 255, 255, 0.2); */
+}
+/* section {
+	padding-top: 0;
+} */
 
 .auth-loading {
   display: none;
@@ -201,16 +269,22 @@ li .memo-title {
 	line-height: 1.5;
 	font-weight: 610;
 }
-
+h2 {
+  display: block;       /* ブロック要素 */
+  font-size: 1.5em;     /* 親要素の1.5倍のフォントサイズ */
+  margin-block-start: 0.5em;  /* 上の余白 */
+  margin-block-end: 0.5em;    /* 下の余白 */
+  font-weight: bold;    /* 太字 */
+  margin-left: 0;
+}
 #editor {
 	min-height: 70vh;
-	padding-top: 100px;
+	padding-top: 30px;
 	outline: none;
 	white-space: pre-wrap;
 	word-break: break-word;
 	border-top: none;
 	/* border-top: 1px solid #ccc; */
-	padding-top: 17px;
 
 	/* iPhoneメモ風 16pxから変更*/
 	font-size: 16.5px;
@@ -235,19 +309,28 @@ li .memo-title {
 	color: #0071e3;
 
 }
-#editor a:visited {
+/* #editor a:visited {
 	color: #754cafb7;
 }
 body.dark #editor a:visited {
 	color: #c7a3f9b7;
+} */
+
+#sidebar-toggle {
+  z-index: 1100;
+  transition: transform 0s ease, opacity 0s ease;
 }
 
-
+#sidebar-toggle.hide {
+  transform: translateY(-100%); /* 上に隠す */
+  opacity: 0;
+}
 img {
 	width: 100%;
 	height: auto;
 	display: block;
 	margin: 8px 0;
+	border-radius: 50%;
 }
 
 /* youtubeとニコニコのみ */
@@ -265,7 +348,7 @@ img {
 	height: 100%;
 	border: 0;
 	margin: 0;
-	z-index: 10000;
+	z-index: 1200;
 }
 
 /* TikTok 用（縦長） */
@@ -299,54 +382,14 @@ img {
 	background: transparent !important;
 }
 
-/* Twitter 用（高さ自動、余白なし） */
-.twitter {
-	width: 100%;
-	background: transparent !important;
-	padding-top: 0;
-	margin: 0;
-	/* background: none; */
+body.spread .twitter {
+  max-width: calc(100% - 40px); /* 左右padding分を引く */
+  margin: 0 auto; /* 真ん中に寄せる */
 }
-
-.twitter blockquote {
-	background: transparent !important;
-	margin: 0;
+body.spread .instagram {
+  max-width: calc(100% - 40px); /* 左右padding分を引く */
+  margin: 0 auto; /* 真ん中に寄せる */
 }
-.twitter iframe {
-  background: transparent !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-}
-
-/* Instagram 完全フル幅 */
-.instagram {
-	position: relative;
-	width: 100%;
-	max-width: 800px;
-	margin: 0 auto;
-	overflow: hidden;
-}
-
-.instagram blockquote,
-.instagram blockquote.instagram-media {
-	margin: 0 !important;
-	padding: 0 !important;
-	width: 100% !important;
-	max-width: 100% !important;
-}
-
-.instagram iframe {
-	width: 100% !important;
-	min-width: 100% !important;
-	max-width: 100% !important;
-	display: block !important;
-	margin: 0 auto !important;
-	border: 0;
-}
-
-
-
 
 .logo-img {
     /* height: 80px;    */
@@ -434,7 +477,10 @@ body.dark .menu-btn:hover,
 .menu-popup button:hover {
 	background: #eee;
 }
-
+.pin-input {
+    width: 400px!important;/* デフォルトより広く */
+    min-width: 800px;
+}
 #user-icon {
 	/* position: absolute; */
 	/* position: fixed; */
@@ -494,6 +540,7 @@ body.dark .menu-btn:hover,
 	display: block;
 	width: 100%;
 	padding: 10px 16px;
+	color: #0071e3;
 	background: none;
 	border: none;
 	text-align: left;
@@ -543,6 +590,18 @@ button {
 	background-color: transparent;
 }
 
+#sidebar .flex-between {
+    position: sticky; /* または absolute でも可 */
+    top: 0;           /* 上から0px */
+    left: 0;          /* 左端 */
+    right: 0;         /* 横幅を広げる */
+    z-index: 10;      /* 他要素より前面 */
+    background: #f9f9f9; 
+    padding-bottom: 0px;    /* 好きな余白 */
+}
+body.dark #sidebar .flex-between {
+    background: black; 
+}
 .flex-between {
 	display: flex;
 	justify-content: space-between;
@@ -605,7 +664,7 @@ body.dark #user-menu {
 }
 
 body.dark #user-menu button {
-	color: #f2f2f7;
+	color: #007fff;
 }
 body.dark #user-menu button:hover {
 	background: #24242e;

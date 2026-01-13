@@ -21,7 +21,12 @@ getRedirectResult( auth ).catch( () => { } );
 
 /* 2️⃣DOM要素格納 このブロックはFirebaseへの通信無し*/
 // すなわちHTML内の各要素（ログイン画面、一覧画面、ゴミ箱画面、エディター画面）を変数に格納する
-const views = { login: document.getElementById( 'view-login' ), list: document.getElementById( 'view-list' ), trash: document.getElementById( 'view-trash' ), editor: document.getElementById( 'view-editor' ) };
+const views = {
+	login: document.getElementById( 'view-login' ),
+	list: document.getElementById( 'view-list' ) || document.querySelector( '#sidebar #view-list' ),
+	trash: document.getElementById( 'view-trash' ),
+	editor: document.getElementById( 'view-editor' )
+};
 //メモ一覧、ゴミ箱、エディター、ユーザーアイコン、メニュー等を表示する要素を取得している
 const memoList = document.getElementById( 'memo-list' );
 const trashList = document.getElementById( 'trash-list' );
@@ -39,11 +44,45 @@ const editorEl = document.getElementById( 'editor' );
 const toast = document.getElementById( 'toast' );
 const darkBtn = document.getElementById( 'dark-btn' );
 const spreadBtn = document.getElementById( 'spread-btn' );
+
+const sidebar = document.getElementById( 'sidebar' );
+const sidebarToggle = document.getElementById( 'sidebar-toggle' );
+const sidebarToggle2 = document.getElementById( 'sidebar-toggle2' );
+
+sidebarToggle.onclick = async () => {
+	sidebar.classList.toggle( 'show' );
+
+	// サイドバーを開いたらメモ一覧をロード
+
+	if ( sidebar.classList.contains( 'show' ) ) {
+		await loadMetaOnce();   // まず metaCache をロード
+		await loadMemos();      // メモ一覧を描画
+	}
+};
+function closeSidebar() {
+	sidebar.classList.remove( 'show' );
+}
+
+// サイドバー閉じるボタン
+sidebarToggle2.onclick = async () => {
+	closeSidebar();
+};
 let currentMemoId = null;
 editor.addEventListener( 'blur', () => {
 	setTimeout( () => {
 		editor.contentEditable = 'false';
 	}, 0 );
+} );
+
+document.addEventListener( 'click', ( e ) => {
+	if ( sidebar.classList.contains( 'show' ) && !sidebar.contains( e.target ) && e.target !== sidebarToggle ) {
+		sidebar.classList.remove( 'show' );
+	}
+} );
+document.addEventListener( 'touchstart', ( e ) => {
+	if ( sidebar.classList.contains( 'show' ) && !sidebar.contains( e.target ) && e.target !== sidebarToggle ) {
+		sidebar.classList.remove( 'show' );
+	}
 } );
 // PC: クリックで編集開始
 editor.addEventListener( 'mousedown', e => {
@@ -67,6 +106,26 @@ editor.addEventListener( 'mousedown', e => {
 } );
 
 // 3️⃣UI操作（フォント、ダークモードなど）
+// 3️⃣UI操作（フォント、ダークモードなど）
+let lastScrollY = window.scrollY;
+const toggleBtn = document.getElementById( 'sidebar-toggle' );
+window.addEventListener( 'scroll', () => {
+	const currentScrollY = window.scrollY;
+
+	if ( currentScrollY <= 0 ) {
+		// ページ最上部 → 必ず表示
+		toggleBtn.classList.remove( 'hide' );
+	} else if ( currentScrollY > lastScrollY ) {
+		// 下スクロール → 表示
+		toggleBtn.style.transition = 'transform 0.7s ease, opacity 0.7s ease'; // ゆっくり出現
+		toggleBtn.classList.add( 'hide' );
+	} else if ( currentScrollY < lastScrollY ) {
+		// 上スクロール → 隠す
+		toggleBtn.classList.remove( 'hide' );
+	}
+
+	lastScrollY = currentScrollY;
+} );
 userIcon.onclick = () => { userMenu.style.display = ( userMenu.style.display === 'block' ) ? 'none' : 'block'; }
 userIcon2.onclick = () => { userMenu.style.display = ( userMenu.style.display === 'block' ) ? 'none' : 'block'; }
 // Aa押した時の挙動
@@ -325,6 +384,9 @@ metaCache.memos
 			link.onclick = e => {
 				e.preventDefault();
 				location.hash = `#/editor/${m.id}`;
+				setTimeout(() => {
+        closeSidebar();
+    }, 100);
 			};
 			li.appendChild( link );
 
@@ -619,6 +681,7 @@ function loadTrash() {
 }
 
 async function openEditor( id ) {
+
 	currentMemoId = id;
 
 	if ( memoCache[id] ) {
@@ -657,6 +720,7 @@ async function showEditor( data ) {
 
 	show( 'editor' );
 	window.scrollTo( 0, 0 );
+	// closeSidebar();
 }
 // --- タイムスタンプ更新関数 ---
 function updateTimestamp(memoId) {
@@ -1352,7 +1416,7 @@ editor.addEventListener( 'keydown', e => {
 } );
 
 /* 9️⃣ ナビゲーション・新規作成ボタン*/
-document.getElementById( 'go-trash' ).onclick = () => { location.hash = '#/trash'; }
+document.getElementById( 'go-trash' ).onclick = () => { location.hash = '#/trash'; closeSidebar();}
 document.getElementById( 'back-list' ).onclick = () => { location.hash = '#/list'; }
 document.getElementById( 'back' ).onclick = () => { if ( history.length > 1 ) history.back(); else location.hash = '#/list'; }
 /* New memo button */
@@ -1380,6 +1444,7 @@ document.getElementById( 'new-memo' ).onclick = async () => {
 
 	// エディタへ
 	location.hash = `#/editor/${ref.id}`;
+	closeSidebar();
 };
 document.getElementById( 'new-memo-2' ).onclick =
 	document.getElementById( 'new-memo' ).onclick;
