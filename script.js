@@ -49,10 +49,18 @@ const sidebar = document.getElementById( 'sidebar' );
 const sidebarToggle = document.getElementById( 'sidebar-toggle' );
 const sidebarToggle2 = document.getElementById( 'sidebar-toggle2' );
 
+sidebarToggle.onclick = async () => {
+	sidebar.classList.toggle( 'show' );
 
+	// サイドバーを開いたらメモ一覧をロード
+
+	if ( sidebar.classList.contains( 'show' ) ) {
+		await loadMetaOnce();   // まず metaCache をロード
+		await loadMemos();      // メモ一覧を描画
+	}
+};
 function closeSidebar() {
-	sidebar.classList.remove('show');
-	overlay.style.display = 'none';
+	sidebar.classList.remove( 'show' );
 }
 
 // サイドバー閉じるボタン
@@ -66,44 +74,16 @@ editor.addEventListener( 'blur', () => {
 	}, 0 );
 } );
 
-const overlay = document.getElementById('sidebar-overlay');
-
-sidebarToggle.onclick = async () => {
-	sidebar.classList.toggle('show');
-
-	if (sidebar.classList.contains('show')) {
-		overlay.style.display = 'block';
-		await loadMetaOnce();
-		await loadMemos();
-	} else {
-		overlay.style.display = 'none';
+document.addEventListener( 'click', ( e ) => {
+	if ( sidebar.classList.contains( 'show' ) && !sidebar.contains( e.target ) && e.target !== sidebarToggle ) {
+		sidebar.classList.remove( 'show' );
 	}
-};
-
-
-
-const block = e => {
-	e.preventDefault();
-	e.stopPropagation();
-	e.stopImmediatePropagation();
-};
-
-// 🔒 editor に絶対行かせない
-overlay.addEventListener('touchstart', block, { passive: false });
-overlay.addEventListener('touchmove', block, { passive: false });
-overlay.addEventListener('mousedown', block);
-overlay.addEventListener('click', block);
-
-// ✅ 閉じるのは touchend / click だけ
-overlay.addEventListener('touchend', e => {
-	block(e);
-	closeSidebar();
-}, { passive: false });
-
-overlay.addEventListener('click', e => {
-	block(e);
-	closeSidebar();
-});
+} );
+document.addEventListener( 'touchstart', ( e ) => {
+	if ( sidebar.classList.contains( 'show' ) && !sidebar.contains( e.target ) && e.target !== sidebarToggle ) {
+		sidebar.classList.remove( 'show' );
+	}
+} );
 // PC: クリックで編集開始
 editor.addEventListener( 'mousedown', e => {
 	// 長押しやリンククリックは除外
