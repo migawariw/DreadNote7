@@ -15,6 +15,7 @@ body {
 body.dark #memo-list li.active {
 	background-color: rgb(28, 28, 28);
 }
+
 #sidebar {
   position: fixed;
   left: 0;
@@ -330,7 +331,6 @@ img {
 	height: auto;
 	display: block;
 	margin: 8px 0;
-	border-radius: 50%;
 }
 
 /* youtubeとニコニコのみ */
