@@ -272,6 +272,13 @@ function renderTotalSize() {
 			? ( bytes / ( 1024 * 1024 ) ).toFixed( 2 ) + ' MB'
 			: Math.round( bytes / 1024 ) + ' KB';
 }
+function renderMemoCount() {
+    const el = document.getElementById('memo-count');
+    if (!el) return;
+
+    const count = metaCache.memos.filter(m => !m.deleted).length;
+    el.textContent = `メモ ${count} 件`;
+}
 async function loadMetaOnce() {
 	if ( metaCache ) return metaCache;
 
@@ -354,6 +361,11 @@ async function loadMetaOnce() {
 	return metaCache;
 }
 
+function closeAllMenus() {
+    document.querySelectorAll('.menu-popup').forEach(m => {
+        m.style.display = 'none';
+    });
+}
 async function loadMemos() {
 	await loadMetaOnce();
 	memoList.innerHTML = '';
@@ -439,137 +451,13 @@ async function loadMemos() {
 			// 📌 ピンボタン
 			const pinBtn = document.createElement( 'button' );
 			pinBtn.textContent = m.pinned ? '📌' : '📍';
-			pinBtn.className = 'menu-btn';
+			pinBtn.onclick = (e) => {
+    e.stopPropagation();
+    menuPopup.style.display = 'none';
+    openPinModal(m);
+};
 			rightDiv.appendChild( pinBtn );
-
-			// 日付入力欄とOK/キャンセルボタン（初期非表示）
-			const pinInput = document.createElement( 'input' );
-			pinInput.type = 'text';
-			pinInput.style.display = 'none';
-			pinInput.style.position = 'absolute';
-			pinInput.style.zIndex = '10';
-			pinInput.style.width = '200px';
-			pinInput.style.padding = '20px 8px';
-			pinInput.style.fontSize = '16px';
-
-			const pinOkBtn = document.createElement( 'button' );
-			pinOkBtn.textContent = 'OK';
-			pinOkBtn.style.display = 'none';
-			pinOkBtn.style.position = 'absolute';
-			pinOkBtn.style.zIndex = '10';
-			pinOkBtn.style.marginLeft = '4px';
-
-			const pinCancelBtn = document.createElement( 'button' );
-			pinCancelBtn.textContent = 'キャンセル';
-			pinCancelBtn.style.display = 'none';
-			pinCancelBtn.style.position = 'absolute';
-			pinCancelBtn.style.zIndex = '10';
-			pinCancelBtn.style.marginLeft = '4px';
-
-			const pinRemoveBtn = document.createElement( 'button' );
-			pinRemoveBtn.textContent = 'ピン解除';
-			pinRemoveBtn.style.display = 'none';
-			pinRemoveBtn.style.position = 'absolute';
-			pinRemoveBtn.style.zIndex = '10';
-			pinRemoveBtn.style.marginLeft = '4px';
-
-
-
-			// 親要素に追加
-			rightDiv.appendChild( pinInput );
-			rightDiv.appendChild( pinOkBtn );
-			rightDiv.appendChild( pinCancelBtn );
-			rightDiv.appendChild( pinRemoveBtn );
-
-			// 初期値設定（既存のコードはそのまま）
-			pinInput.value = new Date( displayDate ).toLocaleString( 'ja-JP', {
-				year: 'numeric', month: '2-digit', day: '2-digit',
-				hour: '2-digit', minute: '2-digit'
-			} );
-			// ピンボタンクリック
-			pinBtn.onclick = ( e ) => {
-				e.stopPropagation();
-				menuPopup.style.display = 'none';
-
-				const rect = pinBtn.getBoundingClientRect();
-				const parentRect = rightDiv.getBoundingClientRect();
-
-				// 親要素相対の座標に変換
-				const top = rect.top - parentRect.top;
-				const left = rect.left - parentRect.left;
-
-				// pinInput.style.top = top + 'px';
-				// pinInput.style.left = left - 120 + 'px';
-
-				pinOkBtn.style.top = top + 200 + 'px';
-				pinOkBtn.style.left = left + 60 + 'px';
-
-				pinCancelBtn.style.top = top + 200 + 'px';
-				pinCancelBtn.style.left = left + 120 + 'px';
-
-				pinRemoveBtn.style.top = top + 250 + 'px';
-				pinRemoveBtn.style.left = left + 60 + 'px';
-
-				const show = pinInput.style.display === 'none';
-				pinInput.style.display = show ? 'inline-block' : 'none';
-				pinOkBtn.style.display = show ? 'inline-block' : 'none';
-				pinCancelBtn.style.display = show ? 'inline-block' : 'none';
-				// 🔹 pinned の時だけ「ピン解除」を表示
-				pinRemoveBtn.style.display =
-					show && m.pinned ? 'inline-block' : 'none';
-
-				if ( show ) pinInput.focus();
-			};
-
-
-			// OK / キャンセルのクリック処理は同じ
-			pinInput.onclick = pinInput.onfocus = ( e ) => e.stopPropagation();
-			pinOkBtn.onclick = async ( e ) => {
-				e.stopPropagation();
-				const value = pinInput.value.trim();
-				const parsed = new Date( value.replace( /-/g, '/' ) );
-				const newTime = parsed.getTime();
-
-				if ( isNaN( newTime ) ) {
-					alert( '無効な日時です' );
-					return;
-				}
-
-				m.pinned = true;
-				m.pinnedDate = newTime;
-				pinBtn.textContent = '📌';
-
-				await saveMeta();
-				loadMemos();
-
-				pinInput.style.display = 'none';
-				pinOkBtn.style.display = 'none';
-				pinCancelBtn.style.display = 'none';
-			};
-
-			pinCancelBtn.onclick = ( e ) => {
-				e.stopPropagation();
-				pinInput.style.display = 'none';
-				pinOkBtn.style.display = 'none';
-				pinCancelBtn.style.display = 'none';
-				pinRemoveBtn.style.display = 'none';
-			};
-			pinRemoveBtn.onclick = async ( e ) => {
-				e.stopPropagation();
-
-				m.pinned = false;
-				delete m.pinnedDate;
-
-				pinBtn.textContent = '📍';
-
-				await saveMeta();
-				loadMemos();
-
-				pinInput.style.display = 'none';
-				pinOkBtn.style.display = 'none';
-				pinCancelBtn.style.display = 'none';
-				pinRemoveBtn.style.display = 'none';
-			};
+			
 
 			const copyBtn = document.createElement( 'button' );
 			copyBtn.textContent = '❐';
@@ -596,11 +484,17 @@ async function loadMemos() {
 			};
 
 			menuPopup.append( pinBtn, copyBtn, delBtn );
-			menuBtn.onclick = e => {
-				e.stopPropagation();
-				menuPopup.style.display =
-					menuPopup.style.display === 'block' ? 'none' : 'block';
-			};
+menuBtn.onclick = e => {
+    e.stopPropagation();
+
+    const isOpen = menuPopup.style.display === 'block';
+
+    closeAllMenus();
+
+    if (!isOpen) {
+        menuPopup.style.display = 'block';
+    }
+};
 
 			rightDiv.append( dateSpan, sizeSpan, menuBtn, menuPopup );
 			//aタグの中に右側も入れる
@@ -609,6 +503,116 @@ async function loadMemos() {
 			memoList.appendChild( li );
 		} );
 	renderTotalSize();
+	renderMemoCount();
+}
+
+function openPinModal(m) {
+    // ===== overlay =====
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.background = 'rgba(0,0,0,0.45)';
+    overlay.style.zIndex = '10000';
+
+    // ===== modal =====
+    const modal = document.createElement('div');
+modal.className = 'pin-modal';
+
+    // ===== title =====
+    const title = document.createElement('h2');
+    title.textContent = m.title || 'New Note';
+    title.style.marginBottom = '12px';
+
+    // ===== input =====
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.style.width = '100%';
+    input.style.fontSize = '16px';
+    input.style.padding = '8px';
+    input.value = new Date(
+        m.pinned ? m.pinnedDate : m.updated
+    ).toLocaleString('ja-JP', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+    });
+
+    // ===== buttons =====
+    const btns = document.createElement('div');
+    btns.style.display = 'flex';
+    btns.style.gap = '8px';
+    btns.style.marginTop = '16px';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = 'ピン解除';
+    removeBtn.style.color = 'red';
+    removeBtn.style.marginRight = 'auto';
+    removeBtn.style.display = m.pinned ? 'inline-block' : 'none';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'キャンセル';
+
+    const okBtn = document.createElement('button');
+    okBtn.textContent = 'OK';
+
+    btns.append(removeBtn, cancelBtn, okBtn);
+    modal.append(title, input, btns);
+    document.body.append(overlay, modal);
+
+    const close = () => {
+        overlay.remove();
+        modal.remove();
+    };
+
+    overlay.onclick = close;
+    cancelBtn.onclick = close;
+
+    okBtn.onclick = async () => {
+        const parsed = new Date(input.value.replace(/-/g, '/'));
+        const time = parsed.getTime();
+
+        if (isNaN(time)) {
+            alert('無効な日時です');
+            return;
+        }
+
+        m.pinned = true;
+        m.pinnedDate = time;
+
+        await saveMeta();
+        loadMemos();
+        close();
+    };
+
+    removeBtn.onclick = async () => {
+        m.pinned = false;
+        delete m.pinnedDate;
+
+        await saveMeta();
+        loadMemos();
+        close();
+    };
+		// ===== 伝播完全遮断 =====
+const stop = e => e.stopPropagation();
+
+modal.addEventListener('click', stop);
+modal.addEventListener('mousedown', stop);
+modal.addEventListener('touchstart', stop);
+
+input.addEventListener('click', stop);
+input.addEventListener('mousedown', stop);
+input.addEventListener('touchstart', stop);
+
+btns.addEventListener('click', stop);
+btns.addEventListener('touchstart', stop);
+// 🔹 overlay：モーダルは閉じるが document へは行かせない
+overlay.addEventListener('click', e => {
+    stop(e);
+    close();
+});
+overlay.addEventListener('touchstart', e => {
+    stop(e);
+    close();
+});
 }
 
 /* Trash表示 */

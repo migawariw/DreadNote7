@@ -16,6 +16,27 @@ body.dark #memo-list li.active {
 	background-color: rgb(28, 28, 28);
 }
 
+.pin-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 320px;
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 10001;
+    background: #fff;
+    color: #111;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+/* 🔹 Dark mode */
+body.dark .pin-modal {
+    background: #1e1e1e;
+    color: #eee;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
 #sidebar {
   position: fixed;
   left: 0;
@@ -197,6 +218,9 @@ section {
   font-weight: 600;
 }
 #total-size {
+	font-size: 12px;
+    opacity: 0.7;
+    margin: 4px 0 8px;
   text-align: right;   /* 数字を右寄せ */
   /* font-weight: bold;   目立たせたい場合 */
 }
@@ -606,6 +630,13 @@ button {
 	background-color: transparent;
 }
 
+.memo-count {
+    font-size: 12px;
+    opacity: 0.7;
+    margin: 4px 0 8px;
+	text-align: right;
+}
+
 #sidebar .flex-between {
     position: sticky; /* または absolute でも可 */
     top: 0;           /* 上から0px */
@@ -624,6 +655,7 @@ body.dark #sidebar .flex-between {
 	align-items: center;
 	padding-left: 10px;
 	/* margin-bottom: 0; */
+	padding-top: 10px;
 }
 
 .longpress-btn {
