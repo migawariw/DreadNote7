@@ -432,7 +432,7 @@ async function loadMemos() {
 			// 🔹 pinned ならマークを追加
 			if ( m.pinned ) {
 				const pin = document.createElement( 'span' );
-				pin.textContent = '🕰️';
+				pin.textContent = '★';
 				pin.style.marginLeft = '4px';
 				dateSpan.appendChild( pin );
 			}
@@ -546,7 +546,8 @@ modal.className = 'pin-modal';
     removeBtn.textContent = 'ピン解除';
     removeBtn.style.color = 'red';
     removeBtn.style.marginRight = 'auto';
-    removeBtn.style.display = m.pinned ? 'inline-block' : 'none';
+    // removeBtn.style.display = m.pinned ? 'inline-block' : 'none';
+		removeBtn.style.visibility = m.pinned ? 'visible' : 'hidden';
 
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = 'キャンセル';
