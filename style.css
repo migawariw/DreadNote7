@@ -40,6 +40,19 @@ body.dark .pin-modal {
 	color: #eee;
 	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
+#sidebar-overlay {
+	position: fixed;
+	inset: 0;
+	background: transparent;   /* 見えない */
+	z-index: 1299;               /* sidebarより下 */
+	display: none;
+	touch-action: none;         /* iOS暴走防止 */
+}
+
+#sidebar.show + #sidebar-overlay,
+#sidebar.show ~ #sidebar-overlay {
+	display: block;
+}
 
 #sidebar {
 	position: fixed;
