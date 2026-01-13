@@ -59,9 +59,46 @@ sidebarToggle.onclick = async () => {
 		await loadMemos();      // メモ一覧を描画
 	}
 };
-function closeSidebar() {
-	sidebar.classList.remove( 'show' );
+let sidebarOverlay = null;
+
+function openSidebar() {
+    sidebar.classList.add('show');
+
+    // overlay がまだなければ作る
+    if (!sidebarOverlay) {
+        sidebarOverlay = document.createElement('div');
+        sidebarOverlay.style.position = 'fixed';
+        sidebarOverlay.style.inset = '0';           // top/right/bottom/left 全て0
+        sidebarOverlay.style.background = 'rgba(121, 121, 121, 0.1)'; // 透明
+        sidebarOverlay.style.zIndex = '999';       // sidebar より下くらい
+        document.body.appendChild(sidebarOverlay);
+
+        // クリックで sidebar 閉じる
+        sidebarOverlay.addEventListener('click', closeSidebar);
+    }
+
+    sidebarOverlay.style.display = 'block';
 }
+
+function closeSidebar() {
+    sidebar.classList.remove('show');
+
+    if (sidebarOverlay) {
+        sidebarOverlay.style.display = 'none';
+    }
+}
+
+// 既存の toggle ボタンに対応
+sidebarToggle.onclick = async () => {
+    if (sidebar.classList.contains('show')) {
+        closeSidebar();
+    } else {
+        await loadMetaOnce();
+        await loadMemos();
+        openSidebar();
+    }
+};
+sidebarToggle2.onclick = closeSidebar;
 
 // サイドバー閉じるボタン
 sidebarToggle2.onclick = async () => {
