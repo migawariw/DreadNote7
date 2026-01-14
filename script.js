@@ -55,49 +55,13 @@ sidebarToggle.onclick = async () => {
 	// サイドバーを開いたらメモ一覧をロード
 
 	if ( sidebar.classList.contains( 'show' ) ) {
+		requireDoubleTap = true; // ← ★リセット
 		await loadMetaOnce();   // まず metaCache をロード
 		await loadMemos();      // メモ一覧を描画
 	}
 };
-let sidebarOverlay = null;
-
-function openSidebar() {
-    sidebar.classList.add('show');
-
-    // overlay がまだなければ作る
-    if (!sidebarOverlay) {
-        sidebarOverlay = document.createElement('div');
-        sidebarOverlay.style.position = 'fixed';
-        sidebarOverlay.style.inset = '0';           // top/right/bottom/left 全て0
-        sidebarOverlay.style.background = 'rgba(121, 121, 121, 0.1)'; // 透明
-        sidebarOverlay.style.zIndex = '999';       // sidebar より下くらい
-        document.body.appendChild(sidebarOverlay);
-
-        // クリックで sidebar 閉じる
-        sidebarOverlay.addEventListener('click', closeSidebar);
-    }
-
-    sidebarOverlay.style.display = 'block';
-}
-
 function closeSidebar() {
-    sidebar.classList.remove('show');
-
-    if (sidebarOverlay) {
-        sidebarOverlay.style.display = 'none';
-    }
-}
-
-// 既存の toggle ボタンに対応
-sidebarToggle.onclick = async () => {
-    if (sidebar.classList.contains('show')) {
-        closeSidebar();
-    } else {
-        await loadMetaOnce();
-        await loadMemos();
-        openSidebar();
-    }
-};
+	sidebar.classList.remove( 'show' );}
 sidebarToggle2.onclick = closeSidebar;
 
 // サイドバー閉じるボタン
@@ -122,26 +86,19 @@ document.addEventListener( 'touchstart', ( e ) => {
 	}
 } );
 // PC: クリックで編集開始
-editor.addEventListener( 'mousedown', e => {
-	// 長押しやリンククリックは除外
-	if ( e.target.closest( 'a' ) || e.target.closest( 'img' ) || e.target.closest( 'iframe' ) ) return;
+editor.addEventListener('mousedown', e => {
+  if (isTouchDevice) return;
+  
+	// 右クリック無視
+    if (e.button !== 0) return;
 
-	if ( editor.contentEditable === 'false' ) {
-		editor.contentEditable = 'true';
+    // すでに編集可能なら何もしない
+    if (editor.contentEditable === 'true') return;
 
-		const x = e.clientX;
-		const y = e.clientY;
-		const range = document.caretRangeFromPoint( x, y );
-		if ( range ) {
-			const sel = window.getSelection();
-			sel.removeAllRanges();
-			sel.addRange( range );
-		}
-
-		editor.focus( { preventScroll: true } );
-	}
-} );
-
+    requireDoubleTap = false; // PCは常にシングル扱い
+    editor.contentEditable = 'true';
+    editor.focus();
+});
 // 3️⃣UI操作（フォント、ダークモードなど）
 // 3️⃣UI操作（フォント、ダークモードなど）
 let lastScrollY = window.scrollY;
@@ -1376,7 +1333,6 @@ editor.addEventListener( 'click', e => {
 		return;
 	}
 
-	// 閲覧中は何もしない（Safariに任せる）
 } );
 
 
@@ -1384,9 +1340,12 @@ let touchStartTime = 0;
 let touchMoved = false;
 let longPress = false;
 let lastTouch = null;
-
+let isTouchDevice = false;
+let requireDoubleTap = false; // ← ここ
+let lastTapTime = 0;
 
 editor.addEventListener( 'touchstart', e => {
+	 isTouchDevice = true;
 	lastTouch = e.touches[0];   // ← ★この1行を追加
 	touchStartTime = Date.now();
 	touchMoved = false;
@@ -1409,33 +1368,43 @@ editor.addEventListener( 'touchmove', () => {
 	touchMoved = true;
 } );
 
-editor.addEventListener( 'touchend', () => {
-	// 🔒 リンクプレビュー後は何もしない
-	if ( longPress ) return;
+editor.addEventListener('touchend', () => {
+    if (editor.contentEditable === 'true') return;
 
-	const dt = Date.now() - touchStartTime;
+    if (requireDoubleTap) {
+        const now = Date.now();
+        if (now - lastTapTime < 300) {
+            enableEdit();
+        }
+        lastTapTime = now;
+        return;
+    }
 
-	// 短タップだけ編集開始
-	if (
-		dt < 300 &&
-		!touchMoved &&
-		editor.contentEditable === 'false'
-	) {
-		editor.contentEditable = 'true';
-		// editor.focus();
-		const x = lastTouch.clientX;
-		const y = lastTouch.clientY;
+    enableEdit();
+});
 
-		const range = document.caretRangeFromPoint( x, y );
-		if ( range ) {
-			const sel = window.getSelection();
-			sel.removeAllRanges();
-			sel.addRange( range );
-		}
+function enableEdit() {
+    // まず editable にする
+    editor.contentEditable = 'true';
+    requireDoubleTap = false;
 
-		editor.focus( { preventScroll: true } );
-	}
-} );
+    // iOS / Android 対策：1フレーム遅らせる
+    requestAnimationFrame(() => {
+        if (lastTouch) {
+            const range = document.caretRangeFromPoint(
+                lastTouch.clientX,
+                lastTouch.clientY
+            );
+            if (range) {
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        }
+
+        editor.focus({ preventScroll: true });
+    });
+}
 
 
 
@@ -1501,6 +1470,7 @@ document.getElementById( 'back-list' ).onclick = () => { location.hash = '#/list
 document.getElementById( 'back' ).onclick = () => { if ( history.length > 1 ) history.back(); else location.hash = '#/list'; }
 /* New memo button */
 document.getElementById( 'new-memo' ).onclick = async () => {
+	requireDoubleTap = false; 
 	await loadMetaOnce(); // ← 必ず先に呼ぶ
 	// 本文ドキュメントを1件だけ作る
 	const ref = await addDoc(
