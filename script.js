@@ -1659,6 +1659,46 @@ editor.addEventListener('paste', async e => {
 	}
 });
 
+editor.addEventListener('copy', e => {
+    const sel = document.getSelection();
+    if (!sel || sel.isCollapsed) return;
+
+    const fragment = sel.getRangeAt(0).cloneContents();
+    const tempDiv = document.createElement('div');
+    tempDiv.appendChild(fragment);
+
+    function getPlainText(node) {
+        if (node.nodeType === Node.TEXT_NODE) return node.textContent;
+        if (node.nodeType !== Node.ELEMENT_NODE) return '';
+
+        // dataset.url を持つ最上位の親を探す
+        const urlAncestor = node.closest('[data-url]');
+        if (urlAncestor) {
+            // base64画像はそのままコピー
+            if (urlAncestor.tagName === 'IMG' && urlAncestor.src.startsWith('data:')) {
+                return urlAncestor.outerHTML;
+            }
+            return urlAncestor.dataset.url;
+        }
+
+        // br は改行に変換
+        if (node.tagName === 'BR') return '\n';
+
+        // blockquote や div も改行で区切る
+        const childrenText = Array.from(node.childNodes).map(getPlainText).join('');
+        if (['DIV', 'P', 'BLOCKQUOTE'].includes(node.tagName)) return childrenText + '\n';
+        return childrenText;
+    }
+
+    let plainText = getPlainText(tempDiv);
+
+    // 最後の余分な改行を削除
+    plainText = plainText.replace(/\n+$/g, '');
+
+    e.preventDefault();
+    e.clipboardData.setData('text/plain', plainText);
+});
+
 editor.addEventListener( 'click', e => {
 	const a = e.target.closest( 'a' );
 	if ( !a ) return;
