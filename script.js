@@ -1429,7 +1429,10 @@ const embedHandlers = [
 			blockquote.setAttribute('data-instgrm-version', '14');
 			wrap.appendChild(blockquote);
 			wrap.dataset.url = url;
-			if (window.instgrm?.Embeds?.process) window.instgrm.Embeds.process(wrap);
+			// 少し遅延して処理する
+        setTimeout(() => {
+            if (window.instgrm?.Embeds?.process) window.instgrm.Embeds.process(wrap);
+        }, 50);
 			return wrap;
 		}
 	},
