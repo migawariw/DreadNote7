@@ -469,7 +469,7 @@ async function loadMemos() {
 			// 🔹 pinned ならマークを追加
 			if ( m.pinned ) {
 				const pin = document.createElement( 'span' );
-				pin.textContent = '●';
+				pin.textContent = '』';
 				pin.style.marginLeft = '4px';
 				dateSpan.appendChild( pin );
 			}
@@ -487,7 +487,7 @@ async function loadMemos() {
 
 			// 📌 ピンボタン
 			const pinBtn = document.createElement( 'button' );
-			pinBtn.textContent = m.pinned ? '○' : '●';
+			pinBtn.textContent = m.pinned ? '』' : '』';
 			pinBtn.onclick = (e) => {
     e.stopPropagation();
     menuPopup.style.display = 'none';
