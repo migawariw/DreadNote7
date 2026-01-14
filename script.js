@@ -88,6 +88,9 @@ document.addEventListener( 'touchstart', ( e ) => {
 // PC: クリックで編集開始
 editor.addEventListener('mousedown', e => {
   if (isTouchDevice) return;
+	// 長押しやリンククリックは除外
+	if ( e.target.closest( 'a' ) || e.target.closest( 'img' ) || e.target.closest( 'iframe' ) ) return;
+
   
 	// 右クリック無視
     if (e.button !== 0) return;
@@ -1369,7 +1372,9 @@ editor.addEventListener( 'touchmove', () => {
 } );
 
 editor.addEventListener('touchend', () => {
-    if (editor.contentEditable === 'true') return;
+  // 🔒 リンクプレビュー後は何もしない
+	if ( longPress ) return;
+	if (editor.contentEditable === 'true') return;
 
     if (requireDoubleTap) {
         const now = Date.now();
