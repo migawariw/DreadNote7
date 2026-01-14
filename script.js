@@ -582,7 +582,7 @@ modal.className = 'pin-modal';
     btns.style.marginTop = '16px';
 
     const removeBtn = document.createElement('button');
-    removeBtn.textContent = 'ピン解除';
+    removeBtn.textContent = '時刻固定解除';
     removeBtn.style.color = 'red';
     removeBtn.style.marginRight = 'auto';
     // removeBtn.style.display = m.pinned ? 'inline-block' : 'none';
@@ -593,9 +593,12 @@ modal.className = 'pin-modal';
 
     const okBtn = document.createElement('button');
     okBtn.textContent = 'OK';
+		
+		const pinMassage = document.createElement('div');
+		pinMassage.textContent = m.pinned ? '時刻固定 』されています。' : '時刻固定 』しますか？';
 
     btns.append(removeBtn, cancelBtn, okBtn);
-    modal.append(title, input, btns);
+    modal.append(pinMassage,title, input, btns);
     document.body.append(overlay, modal);
 
     const close = () => {
