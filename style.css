@@ -8,6 +8,9 @@ body {
 	max-width: 100%;
 	overflow-x: hidden;
 }
+html, body, #editor {
+    touch-action: manipulation; /* ダブルタップズームの制御 */
+}
 
 #memo-list li.active {
 	background-color: rgb(240, 240, 240);

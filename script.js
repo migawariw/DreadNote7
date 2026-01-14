@@ -469,7 +469,7 @@ async function loadMemos() {
 			// 🔹 pinned ならマークを追加
 			if ( m.pinned ) {
 				const pin = document.createElement( 'span' );
-				pin.textContent = '★';
+				pin.textContent = '●';
 				pin.style.marginLeft = '4px';
 				dateSpan.appendChild( pin );
 			}
@@ -487,7 +487,7 @@ async function loadMemos() {
 
 			// 📌 ピンボタン
 			const pinBtn = document.createElement( 'button' );
-			pinBtn.textContent = m.pinned ? '📌' : '📍';
+			pinBtn.textContent = m.pinned ? '○' : '●';
 			pinBtn.onclick = (e) => {
     e.stopPropagation();
     menuPopup.style.display = 'none';
@@ -563,9 +563,11 @@ modal.className = 'pin-modal';
     // ===== input =====
     const input = document.createElement('input');
     input.type = 'text';
-    input.style.width = '100%';
-    input.style.fontSize = '16px';
+    // input.style.width = '100%';
+    input.style.fontSize = '23px';
     input.style.padding = '8px';
+		// input.style.border = '1px solid gray';
+		input.style.borderRadius = '5px';
     input.value = new Date(
         m.pinned ? m.pinnedDate : m.updated
     ).toLocaleString('ja-JP', {
@@ -609,7 +611,7 @@ modal.className = 'pin-modal';
         const time = parsed.getTime();
 
         if (isNaN(time)) {
-            alert('無効な日時です');
+            alert('"yyyy/mm/dd hh:mm" の形式にしてください。');
             return;
         }
 
@@ -857,7 +859,7 @@ async function saveMemo() {
 	for ( const line of lines ) {
 		const trimmed = line.trim();
 		if ( trimmed ) {
-			title = trimmed;
+			title = trimmed.slice(0, 50);
 			break;
 		}
 	}
@@ -989,7 +991,7 @@ editor.addEventListener( 'input', () => {
 	for ( const line of lines ) {
 		const trimmed = line.trim();
 		if ( trimmed ) {
-			title = trimmed;
+			title = trimmed.slice(0, 50);
 			break;
 		}
 	}
