@@ -61,7 +61,8 @@ sidebarToggle.onclick = async () => {
 	}
 };
 function closeSidebar() {
-	sidebar.classList.remove( 'show' );}
+	sidebar.classList.remove( 'show' );
+}
 sidebarToggle2.onclick = closeSidebar;
 
 // サイドバー閉じるボタン
@@ -86,22 +87,22 @@ document.addEventListener( 'touchstart', ( e ) => {
 	}
 } );
 // PC: クリックで編集開始
-editor.addEventListener('mousedown', e => {
-  if (isTouchDevice) return;
+editor.addEventListener( 'mousedown', e => {
+	if ( isTouchDevice ) return;
 	// 長押しやリンククリックは除外
 	if ( e.target.closest( 'a' ) || e.target.closest( 'img' ) || e.target.closest( 'iframe' ) ) return;
 
-  
+
 	// 右クリック無視
-    if (e.button !== 0) return;
+	if ( e.button !== 0 ) return;
 
-    // すでに編集可能なら何もしない
-    if (editor.contentEditable === 'true') return;
+	// すでに編集可能なら何もしない
+	if ( editor.contentEditable === 'true' ) return;
 
-    requireDoubleTap = false; // PCは常にシングル扱い
-    editor.contentEditable = 'true';
-    editor.focus();
-});
+	requireDoubleTap = false; // PCは常にシングル扱い
+	editor.contentEditable = 'true';
+	editor.focus();
+} );
 // 3️⃣UI操作（フォント、ダークモードなど）
 // 3️⃣UI操作（フォント、ダークモードなど）
 let lastScrollY = window.scrollY;
@@ -270,11 +271,11 @@ function renderTotalSize() {
 			: Math.round( bytes / 1024 ) + ' KB';
 }
 function renderMemoCount() {
-    const el = document.getElementById('memo-count');
-    if (!el) return;
+	const el = document.getElementById( 'memo-count' );
+	if ( !el ) return;
 
-    const count = metaCache.memos.filter(m => !m.deleted).length;
-    el.textContent = `メモ ${count} 件`;
+	const count = metaCache.memos.filter( m => !m.deleted ).length;
+	el.textContent = `メモ ${count} 件`;
 }
 async function loadMetaOnce() {
 	if ( metaCache ) return metaCache;
@@ -359,9 +360,9 @@ async function loadMetaOnce() {
 }
 
 function closeAllMenus() {
-    document.querySelectorAll('.menu-popup').forEach(m => {
-        m.style.display = 'none';
-    });
+	document.querySelectorAll( '.menu-popup' ).forEach( m => {
+		m.style.display = 'none';
+	} );
 }
 async function loadMemos() {
 	await loadMetaOnce();
@@ -448,13 +449,13 @@ async function loadMemos() {
 			// 📌 ピンボタン
 			const pinBtn = document.createElement( 'button' );
 			pinBtn.textContent = m.pinned ? '』' : '』';
-			pinBtn.onclick = (e) => {
-    e.stopPropagation();
-    menuPopup.style.display = 'none';
-    openPinModal(m);
-};
+			pinBtn.onclick = ( e ) => {
+				e.stopPropagation();
+				menuPopup.style.display = 'none';
+				openPinModal( m );
+			};
 			rightDiv.appendChild( pinBtn );
-			
+
 
 			const copyBtn = document.createElement( 'button' );
 			copyBtn.textContent = '❐';
@@ -481,17 +482,17 @@ async function loadMemos() {
 			};
 
 			menuPopup.append( pinBtn, copyBtn, delBtn );
-menuBtn.onclick = e => {
-    e.stopPropagation();
+			menuBtn.onclick = e => {
+				e.stopPropagation();
 
-    const isOpen = menuPopup.style.display === 'block';
+				const isOpen = menuPopup.style.display === 'block';
 
-    closeAllMenus();
+				closeAllMenus();
 
-    if (!isOpen) {
-        menuPopup.style.display = 'block';
-    }
-};
+				if ( !isOpen ) {
+					menuPopup.style.display = 'block';
+				}
+			};
 
 			rightDiv.append( dateSpan, sizeSpan, menuBtn, menuPopup );
 			//aタグの中に右側も入れる
@@ -503,119 +504,119 @@ menuBtn.onclick = e => {
 	renderMemoCount();
 }
 
-function openPinModal(m) {
-    // ===== overlay =====
-    const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.inset = '0';
-    overlay.style.background = 'rgba(0,0,0,0.45)';
-    overlay.style.zIndex = '10000';
+function openPinModal( m ) {
+	// ===== overlay =====
+	const overlay = document.createElement( 'div' );
+	overlay.style.position = 'fixed';
+	overlay.style.inset = '0';
+	overlay.style.background = 'rgba(0,0,0,0.45)';
+	overlay.style.zIndex = '10000';
 
-    // ===== modal =====
-    const modal = document.createElement('div');
-modal.className = 'pin-modal';
+	// ===== modal =====
+	const modal = document.createElement( 'div' );
+	modal.className = 'pin-modal';
 
-    // ===== title =====
-    const title = document.createElement('h2');
-    title.textContent = m.title || 'New Note';
-    title.style.marginBottom = '12px';
+	// ===== title =====
+	const title = document.createElement( 'h2' );
+	title.textContent = m.title || 'New Note';
+	title.style.marginBottom = '12px';
 
-    // ===== input =====
-    const input = document.createElement('input');
-    input.type = 'text';
-    // input.style.width = '100%';
-    input.style.fontSize = '23px';
-    input.style.padding = '8px';
-		// input.style.border = '1px solid gray';
-		input.style.borderRadius = '5px';
-    input.value = new Date(
-        m.pinned ? m.pinnedDate : m.updated
-    ).toLocaleString('ja-JP', {
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit'
-    });
+	// ===== input =====
+	const input = document.createElement( 'input' );
+	input.type = 'text';
+	// input.style.width = '100%';
+	input.style.fontSize = '23px';
+	input.style.padding = '8px';
+	// input.style.border = '1px solid gray';
+	input.style.borderRadius = '5px';
+	input.value = new Date(
+		m.pinned ? m.pinnedDate : m.updated
+	).toLocaleString( 'ja-JP', {
+		year: 'numeric', month: '2-digit', day: '2-digit',
+		hour: '2-digit', minute: '2-digit'
+	} );
 
-    // ===== buttons =====
-    const btns = document.createElement('div');
-    btns.style.display = 'flex';
-    btns.style.gap = '8px';
-    btns.style.marginTop = '16px';
+	// ===== buttons =====
+	const btns = document.createElement( 'div' );
+	btns.style.display = 'flex';
+	btns.style.gap = '8px';
+	btns.style.marginTop = '16px';
 
-    const removeBtn = document.createElement('button');
-    removeBtn.textContent = '時刻固定解除';
-    removeBtn.style.color = 'red';
-    removeBtn.style.marginRight = 'auto';
-    // removeBtn.style.display = m.pinned ? 'inline-block' : 'none';
-		removeBtn.style.visibility = m.pinned ? 'visible' : 'hidden';
+	const removeBtn = document.createElement( 'button' );
+	removeBtn.textContent = '時刻固定解除';
+	removeBtn.style.color = 'red';
+	removeBtn.style.marginRight = 'auto';
+	// removeBtn.style.display = m.pinned ? 'inline-block' : 'none';
+	removeBtn.style.visibility = m.pinned ? 'visible' : 'hidden';
 
-    const cancelBtn = document.createElement('button');
-    cancelBtn.textContent = 'キャンセル';
+	const cancelBtn = document.createElement( 'button' );
+	cancelBtn.textContent = 'キャンセル';
 
-    const okBtn = document.createElement('button');
-    okBtn.textContent = 'OK';
-		
-		const pinMassage = document.createElement('div');
-		pinMassage.textContent = m.pinned ? '時刻固定 』されています。' : '時刻固定 』しますか？';
+	const okBtn = document.createElement( 'button' );
+	okBtn.textContent = 'OK';
 
-    btns.append(removeBtn, cancelBtn, okBtn);
-    modal.append(pinMassage,title, input, btns);
-    document.body.append(overlay, modal);
+	const pinMassage = document.createElement( 'div' );
+	pinMassage.textContent = m.pinned ? '時刻固定 』されています。' : '時刻固定 』しますか？';
 
-    const close = () => {
-        overlay.remove();
-        modal.remove();
-    };
+	btns.append( removeBtn, cancelBtn, okBtn );
+	modal.append( pinMassage, title, input, btns );
+	document.body.append( overlay, modal );
 
-    overlay.onclick = close;
-    cancelBtn.onclick = close;
+	const close = () => {
+		overlay.remove();
+		modal.remove();
+	};
 
-    okBtn.onclick = async () => {
-        const parsed = new Date(input.value.replace(/-/g, '/'));
-        const time = parsed.getTime();
+	overlay.onclick = close;
+	cancelBtn.onclick = close;
 
-        if (isNaN(time)) {
-            alert('"yyyy/mm/dd hh:mm" の形式にしてください。');
-            return;
-        }
+	okBtn.onclick = async () => {
+		const parsed = new Date( input.value.replace( /-/g, '/' ) );
+		const time = parsed.getTime();
 
-        m.pinned = true;
-        m.pinnedDate = time;
+		if ( isNaN( time ) ) {
+			alert( '"yyyy/mm/dd hh:mm" の形式にしてください。' );
+			return;
+		}
 
-        await saveMeta();
-        loadMemos();
-        close();
-    };
+		m.pinned = true;
+		m.pinnedDate = time;
 
-    removeBtn.onclick = async () => {
-        m.pinned = false;
-        delete m.pinnedDate;
+		await saveMeta();
+		loadMemos();
+		close();
+	};
 
-        await saveMeta();
-        loadMemos();
-        close();
-    };
-		// ===== 伝播完全遮断 =====
-const stop = e => e.stopPropagation();
+	removeBtn.onclick = async () => {
+		m.pinned = false;
+		delete m.pinnedDate;
 
-modal.addEventListener('click', stop);
-modal.addEventListener('mousedown', stop);
-modal.addEventListener('touchstart', stop);
+		await saveMeta();
+		loadMemos();
+		close();
+	};
+	// ===== 伝播完全遮断 =====
+	const stop = e => e.stopPropagation();
 
-input.addEventListener('click', stop);
-input.addEventListener('mousedown', stop);
-input.addEventListener('touchstart', stop);
+	modal.addEventListener( 'click', stop );
+	modal.addEventListener( 'mousedown', stop );
+	modal.addEventListener( 'touchstart', stop );
 
-btns.addEventListener('click', stop);
-btns.addEventListener('touchstart', stop);
-// 🔹 overlay：モーダルは閉じるが document へは行かせない
-overlay.addEventListener('click', e => {
-    stop(e);
-    close();
-});
-overlay.addEventListener('touchstart', e => {
-    stop(e);
-    close();
-});
+	input.addEventListener( 'click', stop );
+	input.addEventListener( 'mousedown', stop );
+	input.addEventListener( 'touchstart', stop );
+
+	btns.addEventListener( 'click', stop );
+	btns.addEventListener( 'touchstart', stop );
+	// 🔹 overlay：モーダルは閉じるが document へは行かせない
+	overlay.addEventListener( 'click', e => {
+		stop( e );
+		close();
+	} );
+	overlay.addEventListener( 'touchstart', e => {
+		stop( e );
+		close();
+	} );
 }
 
 /* Trash表示 */
@@ -732,6 +733,7 @@ async function openEditor( id ) {
 	const snap = await getDoc( doc( db, 'users', auth.currentUser.uid, 'memos', id ) );
 	const data = snap.data();
 	memoCache[id] = data;
+	localUpdated = data.updated || 0;
 	showEditor( data );
 }
 
@@ -808,6 +810,7 @@ window.addEventListener( 'hashchange', ( e ) => {
 	prevHash = newHash;
 } );
 //7️⃣-2 メモ関連の処理の関数（loadMeta, loadMemos, openEditor, saveMemo, updateMeta など）
+let localUpdated = 0;
 async function saveMemo() {
 	if ( !currentMemoId ) return;
 
@@ -822,17 +825,88 @@ async function saveMemo() {
 	for ( const line of lines ) {
 		const trimmed = line.trim();
 		if ( trimmed ) {
-			title = trimmed.slice(0, 50);
+			title = trimmed.slice( 0, 50 );
 			break;
 		}
 	}
+	const memoRef = doc( db, 'users', auth.currentUser.uid, 'memos', currentMemoId );
+	const snap = await getDoc( memoRef );
+	const serverData = snap.exists() ? snap.data() : null;
+	// 🔹 デバッグ用: タイムスタンプをコンソールに表示
+	// console.log( `🕒 現在端末の更新時刻: ${new Date( localUpdated ).toLocaleString()}` );
+	// if ( serverData?.updated ) {
+	// 	console.log( `🕒 サーバー上の最新更新時刻: ${new Date( serverData.updated ).toLocaleString()}` );
+	// }
 
-	// Firestore 保存
-	await setDoc(
-		doc( db, 'users', auth.currentUser.uid, 'memos', currentMemoId ),
-		{ content, updated },
-		{ merge: true }
-	);
+
+	// 🔹 競合検知
+	if ( serverData && serverData.updated && serverData.updated > localUpdated ) {
+		// カスタムモーダル表示
+		const choice = await new Promise( resolve => {
+			// オーバーレイ
+			const overlay = document.createElement( 'div' );
+			overlay.style.position = 'fixed';
+			overlay.style.inset = '0';
+			overlay.style.background = 'rgba(0,0,0,0.45)';
+			overlay.style.zIndex = '10000';
+
+			// モーダル本体
+			const modal = document.createElement( 'div' );
+			modal.style.position = 'fixed';
+			modal.style.top = '50%';
+			modal.style.left = '50%';
+			modal.style.transform = 'translate(-50%, -50%)';
+			modal.style.background = '#fff';
+			modal.style.padding = '20px';
+			modal.style.borderRadius = '8px';
+			modal.style.minWidth = '300px';
+			modal.style.textAlign = 'center';
+			modal.style.zIndex = '10001';
+
+			const msg = document.createElement( 'p' );
+			msg.textContent = "他の端末で更新されています。\n\n" +
+				`この端末がメモを開いた時点での最終更新時刻:\n ${new Date( localUpdated ).toLocaleString()}\n\n` +
+				`サーバーには以下の日時のデータがあります。:\n ${new Date( serverData.updated ).toLocaleString()}\n\n`;
+				// "サーバー内容で上書き / 現在内容で上書き / 何もしない";
+			msg.style.whiteSpace = 'pre-wrap';
+
+			const btnServer = document.createElement( 'button' );
+			btnServer.textContent = 'サーバーで上書き';
+			const btnLocal = document.createElement( 'button' );
+			btnLocal.textContent = '現在内容で上書き';
+			const btnNone = document.createElement( 'button' );
+			btnNone.textContent = '何もしない';
+
+			btnServer.style.margin = '5px';
+			btnLocal.style.margin = '5px';
+			btnNone.style.margin = '5px';
+
+			btnServer.onclick = () => { resolve( 'server' ); overlay.remove(); modal.remove(); };
+			btnLocal.onclick = () => { resolve( 'local' ); overlay.remove(); modal.remove(); };
+			btnNone.onclick = () => { resolve( 'none' ); overlay.remove(); modal.remove(); };
+
+			modal.append( msg, btnServer, btnLocal, btnNone );
+			document.body.append( overlay, modal );
+		} );
+
+if ( choice === 'server' ) {
+    // サーバー内容で上書き
+    memoCache[currentMemoId] = serverData;
+    showEditor(serverData);
+    localUpdated = serverData.updated;
+    showToast("サーバー内容で更新しました");
+    return;
+} else if ( choice === 'none' ) {
+    // 何もしない → 処理終了
+    return;
+}
+// choice === 'local' はここに来る → 下の Firestore 保存処理に進む
+	}
+
+	// Firestore 保存（現在内容で上書き）
+	await setDoc( memoRef, { content, updated }, { merge: true } );
+	localUpdated = updated; // 保存したので端末保持の時刻も更新
+
 
 	// meta 更新（タイトル・size・edited）
 	await updateMeta( currentMemoId, { updated, edited: 1, size, title, hasContent } );
@@ -954,7 +1028,7 @@ editor.addEventListener( 'input', () => {
 	for ( const line of lines ) {
 		const trimmed = line.trim();
 		if ( trimmed ) {
-			title = trimmed.slice(0, 50);
+			title = trimmed.slice( 0, 50 );
 			break;
 		}
 	}
@@ -997,7 +1071,7 @@ editor.addEventListener( 'input', () => {
 		// spinner.style.display = 'none';
 		spinner.classList.add( 'completed' );
 		spinner.style.visibility = 'visible'; // 完了でも表示
-		timestampEl.textContent = formatDateTime( new Date() );
+		timestampEl.textContent = formatDateTime( new Date( meta.updatedAt ) );
 		timestampEl.style.color = '#999'; // 完了後もグレー表示
 
 	}, 500 );
@@ -1083,65 +1157,65 @@ const pasteConfig = {
 };
 
 /* =========================
-   Range utilities
+	 Range utilities
 ========================= */
 function getCurrentRange() {
 	const sel = document.getSelection();
-	if (!sel || !sel.rangeCount) return null;
-	return sel.getRangeAt(0);
+	if ( !sel || !sel.rangeCount ) return null;
+	return sel.getRangeAt( 0 );
 }
 
-function replaceRangeWithNodes(editor, range, nodes) {
+function replaceRangeWithNodes( editor, range, nodes ) {
 	range.deleteContents();
-	for (const node of nodes) {
-		range.insertNode(node);
-		range.setStartAfter(node);
+	for ( const node of nodes ) {
+		range.insertNode( node );
+		range.setStartAfter( node );
 	}
-	range.collapse(true);
-	editor.dispatchEvent(new Event('input', { bubbles: true }));
+	range.collapse( true );
+	editor.dispatchEvent( new Event( 'input', { bubbles: true } ) );
 }
 
 /* =========================
-   URL utilities
+	 URL utilities
 ========================= */
 const URL_REGEX = /(https?:\/\/[^\s]+)/g;
 const IMAGE_URL_REGEX = /\.(png|jpe?g|gif|webp)(\?.*)?$/i;
 
-function splitTextByUrl(text) {
+function splitTextByUrl( text ) {
 	const parts = [];
 	let last = 0;
-	for (const m of text.matchAll(URL_REGEX)) {
-		if (m.index > last) {
-			parts.push({ type: 'text', value: text.slice(last, m.index) });
+	for ( const m of text.matchAll( URL_REGEX ) ) {
+		if ( m.index > last ) {
+			parts.push( { type: 'text', value: text.slice( last, m.index ) } );
 		}
-		parts.push({ type: 'url', value: m[0] });
+		parts.push( { type: 'url', value: m[0] } );
 		last = m.index + m[0].length;
 	}
-	if (last < text.length) {
-		parts.push({ type: 'text', value: text.slice(last) });
+	if ( last < text.length ) {
+		parts.push( { type: 'text', value: text.slice( last ) } );
 	}
 	return parts;
 }
 
-function isSingleUrlLine(line) {
-	return /^https?:\/\/[^\s]+$/.test(line.trim());
+function isSingleUrlLine( line ) {
+	return /^https?:\/\/[^\s]+$/.test( line.trim() );
 }
 
 /* =========================
-   Embed handlers
+	 Embed handlers
 ========================= */
 const embedHandlers = [
 	// YouTube
 	{
 		match: url =>
-			url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]+)/i),
-		create: (m, url) => {
-			const wrap = document.createElement('div');
+			url.match( /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]+)/i ),
+		create: ( m, url ) => {
+			const wrap = document.createElement( 'div' );
 			wrap.className = 'video'; // CSSの幅とpadding-topを使う
-			const iframe = document.createElement('iframe');
+			const iframe = document.createElement( 'iframe' );
 			iframe.src = `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0&playsinline=1`;
 			iframe.allowFullscreen = true;
-			wrap.appendChild(iframe);
+			wrap.appendChild( iframe );
 			wrap.dataset.url = url;
 			return wrap;
 		}
@@ -1150,18 +1224,18 @@ const embedHandlers = [
 	// X / Twitter
 	{
 		match: url =>
-			url.match(/(?:twitter\.com|x\.com)\/[\w@]+\/status\/\d+/i),
-		create: (m, url) => {
-			const wrap = document.createElement('div');
+			url.match( /(?:twitter\.com|x\.com)\/[\w@]+\/status\/\d+/i ),
+		create: ( m, url ) => {
+			const wrap = document.createElement( 'div' );
 			wrap.className = 'twitter';
-			const blockquote = document.createElement('blockquote');
+			const blockquote = document.createElement( 'blockquote' );
 			blockquote.className = 'twitter-tweet';
-			const a = document.createElement('a');
-			a.href = url.replace(/^https?:\/\/x\.com/i, 'https://twitter.com');
-			blockquote.appendChild(a);
-			wrap.appendChild(blockquote);
+			const a = document.createElement( 'a' );
+			a.href = url.replace( /^https?:\/\/x\.com/i, 'https://twitter.com' );
+			blockquote.appendChild( a );
+			wrap.appendChild( blockquote );
 			wrap.dataset.url = url;
-			if (window.twttr?.widgets) window.twttr.widgets.load(wrap);
+			if ( window.twttr?.widgets ) window.twttr.widgets.load( wrap );
 			return wrap;
 		}
 	},
@@ -1169,20 +1243,20 @@ const embedHandlers = [
 	// Instagram
 	{
 		match: url =>
-			url.match(/instagram\.com\/(p|reel)\/([\w-]+)/i),
-		create: (m, url) => {
-			const wrap = document.createElement('div');
+			url.match( /instagram\.com\/(p|reel)\/([\w-]+)/i ),
+		create: ( m, url ) => {
+			const wrap = document.createElement( 'div' );
 			wrap.className = 'instagram';
-			const blockquote = document.createElement('blockquote');
+			const blockquote = document.createElement( 'blockquote' );
 			blockquote.className = 'instagram-media';
-			blockquote.setAttribute('data-instgrm-permalink', url);
-			blockquote.setAttribute('data-instgrm-version', '14');
-			wrap.appendChild(blockquote);
+			blockquote.setAttribute( 'data-instgrm-permalink', url );
+			blockquote.setAttribute( 'data-instgrm-version', '14' );
+			wrap.appendChild( blockquote );
 			wrap.dataset.url = url;
 			// 少し遅延して処理する
-        setTimeout(() => {
-            if (window.instgrm?.Embeds?.process) window.instgrm.Embeds.process(wrap);
-        }, 50);
+			setTimeout( () => {
+				if ( window.instgrm?.Embeds?.process ) window.instgrm.Embeds.process( wrap );
+			}, 50 );
 			return wrap;
 		}
 	},
@@ -1190,15 +1264,15 @@ const embedHandlers = [
 	// TikTok
 	{
 		match: url =>
-			url.match(/tiktok\.com\/.*\/video\/(\d+)/i),
-		create: (m, url) => {
-			const wrap = document.createElement('div');
+			url.match( /tiktok\.com\/.*\/video\/(\d+)/i ),
+		create: ( m, url ) => {
+			const wrap = document.createElement( 'div' );
 			wrap.className = 'tiktok';
-			const iframe = document.createElement('iframe');
+			const iframe = document.createElement( 'iframe' );
 			iframe.src = `https://www.tiktok.com/embed/${m[1]}`;
 			iframe.allow = 'autoplay; fullscreen';
 			iframe.allowFullscreen = true;
-			wrap.appendChild(iframe);
+			wrap.appendChild( iframe );
 			wrap.dataset.url = url;
 			return wrap;
 		}
@@ -1207,15 +1281,15 @@ const embedHandlers = [
 	// ニコニコ動画
 	{
 		match: url =>
-			url.match(/nicovideo\.jp\/watch\/([\w]+)/i),
-		create: (m, url) => {
-			const wrap = document.createElement('div');
+			url.match( /nicovideo\.jp\/watch\/([\w]+)/i ),
+		create: ( m, url ) => {
+			const wrap = document.createElement( 'div' );
 			wrap.className = 'video';
-			const iframe = document.createElement('iframe');
+			const iframe = document.createElement( 'iframe' );
 			iframe.src = `https://embed.nicovideo.jp/watch/${m[1]}`;
-			iframe.setAttribute('frameborder', '0');
-			iframe.setAttribute('allowfullscreen', '');
-			wrap.appendChild(iframe);
+			iframe.setAttribute( 'frameborder', '0' );
+			iframe.setAttribute( 'allowfullscreen', '' );
+			wrap.appendChild( iframe );
 			wrap.dataset.url = url;
 			return wrap;
 		}
@@ -1223,14 +1297,14 @@ const embedHandlers = [
 ];
 
 /* =========================
-   Image paste (single image)
+	 Image paste (single image)
 ========================= */
-async function handleSingleImagePaste(file, editor, range) {
+async function handleSingleImagePaste( file, editor, range ) {
 	const originalSizeBytes = file.size;
 
 	// 元画像読み込み
 	const img = new Image();
-	const blobUrl = URL.createObjectURL(file);
+	const blobUrl = URL.createObjectURL( file );
 	img.src = blobUrl;
 	await img.decode();
 
@@ -1238,16 +1312,16 @@ async function handleSingleImagePaste(file, editor, range) {
 	const MAX_WIDTH = 1024;
 	let w = img.width;
 	let h = img.height;
-	if (w > MAX_WIDTH) {
-		h = Math.round(h * (MAX_WIDTH / w));
+	if ( w > MAX_WIDTH ) {
+		h = Math.round( h * ( MAX_WIDTH / w ) );
 		w = MAX_WIDTH;
 	}
 
-	const canvas = document.createElement('canvas');
+	const canvas = document.createElement( 'canvas' );
 	canvas.width = w;
 	canvas.height = h;
-	const ctx = canvas.getContext('2d');
-	ctx.drawImage(img, 0, 0, w, h);
+	const ctx = canvas.getContext( '2d' );
+	ctx.drawImage( img, 0, 0, w, h );
 
 	// JPEG圧縮 + 最大容量保証
 	const MAX_BYTES = 100000; // 例: 100KB
@@ -1261,21 +1335,21 @@ async function handleSingleImagePaste(file, editor, range) {
 	const originalWidth = canvas.width;
 	const originalHeight = canvas.height;
 
-	let safeBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+	let safeBlob = await new Promise( resolve => canvas.toBlob( resolve, 'image/jpeg', quality ) );
 
-	while (safeBlob.size > MAX_BLOB_BYTES && (quality > 0.1 || scale > 0.1)) {
+	while ( safeBlob.size > MAX_BLOB_BYTES && ( quality > 0.1 || scale > 0.1 ) ) {
 		loopCount++;
-		if (quality > 0.1) {
+		if ( quality > 0.1 ) {
 			quality -= 0.05;
-			safeBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+			safeBlob = await new Promise( resolve => canvas.toBlob( resolve, 'image/jpeg', quality ) );
 		} else {
 			scale *= 0.9;
-			const tmpCanvas = document.createElement('canvas');
-			tmpCanvas.width = Math.floor(originalWidth * scale);
-			tmpCanvas.height = Math.floor(originalHeight * scale);
-			const tmpCtx = tmpCanvas.getContext('2d');
-			tmpCtx.drawImage(canvas, 0, 0, tmpCanvas.width, tmpCanvas.height);
-			safeBlob = await new Promise(resolve => tmpCanvas.toBlob(resolve, 'image/jpeg', quality));
+			const tmpCanvas = document.createElement( 'canvas' );
+			tmpCanvas.width = Math.floor( originalWidth * scale );
+			tmpCanvas.height = Math.floor( originalHeight * scale );
+			const tmpCtx = tmpCanvas.getContext( '2d' );
+			tmpCtx.drawImage( canvas, 0, 0, tmpCanvas.width, tmpCanvas.height );
+			safeBlob = await new Promise( resolve => tmpCanvas.toBlob( resolve, 'image/jpeg', quality ) );
 		}
 	}
 
@@ -1285,169 +1359,169 @@ async function handleSingleImagePaste(file, editor, range) {
 		const base64 = reader.result;
 
 		// showToastなどでサイズ表示
-		if (typeof showToast === 'function') {
+		if ( typeof showToast === 'function' ) {
 			const formatSize = bytes => bytes >= 1024 * 1024
-				? (bytes / (1024 * 1024)).toFixed(1) + ' MB'
-				: Math.round(bytes / 1024) + ' KB';
-			showToast(`Saved: ${formatSize(base64.length)} (Original: ${formatSize(originalSizeBytes)}) | JPEG loops: ${loopCount}`);
+				? ( bytes / ( 1024 * 1024 ) ).toFixed( 1 ) + ' MB'
+				: Math.round( bytes / 1024 ) + ' KB';
+			showToast( `Saved: ${formatSize( base64.length )} (Original: ${formatSize( originalSizeBytes )}) | JPEG loops: ${loopCount}` );
 		}
 
 		// <img> に挿入
-		const imgEl = document.createElement('img');
+		const imgEl = document.createElement( 'img' );
 		imgEl.src = base64;
-		range.insertNode(imgEl);
+		range.insertNode( imgEl );
 
 		// カーソルを画像の後ろに移動
-		const br = document.createElement('br');
-		range.setStartAfter(imgEl);
-		range.insertNode(br);
-		range.setStartAfter(br);
-		range.collapse(true);
+		const br = document.createElement( 'br' );
+		range.setStartAfter( imgEl );
+		range.insertNode( br );
+		range.setStartAfter( br );
+		range.collapse( true );
 
-		editor.dispatchEvent(new Event('input', { bubbles: true }));
+		editor.dispatchEvent( new Event( 'input', { bubbles: true } ) );
 	};
-	reader.readAsDataURL(safeBlob);
+	reader.readAsDataURL( safeBlob );
 }
 
 /* =========================
-   paste handler
+	 paste handler
 ========================= */
-editor.addEventListener('paste', async e => {
+editor.addEventListener( 'paste', async e => {
 	const items = e.clipboardData?.items || [];
-	const text = e.clipboardData?.getData('text/plain') || '';
+	const text = e.clipboardData?.getData( 'text/plain' ) || '';
 	const range = getCurrentRange();
-	if (!range) return;
+	if ( !range ) return;
 
 	/* ---- image only ---- */
-	const imageItems = [...items].filter(i => i.type.startsWith('image/'));
-	if (imageItems.length === 1 && items.length === 1) {
+	const imageItems = [...items].filter( i => i.type.startsWith( 'image/' ) );
+	if ( imageItems.length === 1 && items.length === 1 ) {
 		e.preventDefault();
 		const file = imageItems[0].getAsFile();
-		if (file) await handleSingleImagePaste(file, editor, range);
+		if ( file ) await handleSingleImagePaste( file, editor, range );
 		return;
 	}
 
 	e.preventDefault();
 
-	const lines = text.replace(/\r\n/g, '\n').split('\n');
+	const lines = text.replace( /\r\n/g, '\n' ).split( '\n' );
 	const nodes = [];
 
-	for (const line of lines) {
+	for ( const line of lines ) {
 		const trimmed = line.trim();
 
 		/* ---- URL単体行 ---- */
-		if (pasteConfig.enableEmbed && isSingleUrlLine(trimmed)) {
+		if ( pasteConfig.enableEmbed && isSingleUrlLine( trimmed ) ) {
 			let embedded = false;
 
 			// SNS embed
-			for (const h of embedHandlers) {
-				const m = h.match(trimmed);
-				if (m) {
-					nodes.push(h.create(m, trimmed));
-					nodes.push(document.createElement('br'));
+			for ( const h of embedHandlers ) {
+				const m = h.match( trimmed );
+				if ( m ) {
+					nodes.push( h.create( m, trimmed ) );
+					nodes.push( document.createElement( 'br' ) );
 					embedded = true;
 					break;
 				}
 			}
 
-			if (embedded) continue;
+			if ( embedded ) continue;
 
 			// 画像URL
-			if (IMAGE_URL_REGEX.test(trimmed)) {
-				const a = document.createElement('a');
+			if ( IMAGE_URL_REGEX.test( trimmed ) ) {
+				const a = document.createElement( 'a' );
 				a.href = trimmed;
 				a.target = '_blank';
 				a.dataset.url = trimmed;
-				const img = document.createElement('img');
+				const img = document.createElement( 'img' );
 				img.src = trimmed;
-				a.appendChild(img);
-				nodes.push(a, document.createElement('br'));
+				a.appendChild( img );
+				nodes.push( a, document.createElement( 'br' ) );
 				continue;
 			}
 
 			// 通常URL
-			if (pasteConfig.enableUrlLink) {
-				const a = document.createElement('a');
+			if ( pasteConfig.enableUrlLink ) {
+				const a = document.createElement( 'a' );
 				a.href = trimmed;
 				a.textContent = trimmed;
 				a.target = '_blank';
 				a.dataset.url = trimmed;
-				nodes.push(a, document.createElement('br'));
+				nodes.push( a, document.createElement( 'br' ) );
 				continue;
 			}
 		}
 
 		/* ---- 文中URL ---- */
-		if (pasteConfig.enableUrlLink && URL_REGEX.test(line)) {
-			const parts = splitTextByUrl(line);
-			for (const p of parts) {
-				if (p.type === 'text') {
-					nodes.push(document.createTextNode(p.value));
+		if ( pasteConfig.enableUrlLink && URL_REGEX.test( line ) ) {
+			const parts = splitTextByUrl( line );
+			for ( const p of parts ) {
+				if ( p.type === 'text' ) {
+					nodes.push( document.createTextNode( p.value ) );
 				} else {
-					const a = document.createElement('a');
+					const a = document.createElement( 'a' );
 					a.href = p.value;
 					a.textContent = p.value;
 					a.target = '_blank';
 					a.dataset.url = p.value;
-					nodes.push(a);
+					nodes.push( a );
 				}
 			}
-			nodes.push(document.createElement('br'));
+			nodes.push( document.createElement( 'br' ) );
 			continue;
 		}
 
 		/* ---- 純テキスト ---- */
-		nodes.push(document.createTextNode(line));
-		nodes.push(document.createElement('br'));
+		nodes.push( document.createTextNode( line ) );
+		nodes.push( document.createElement( 'br' ) );
 	}
 
 	// 最後の br を除去
-	if (nodes.at(-1)?.nodeName === 'BR') nodes.pop();
+	if ( nodes.at( -1 )?.nodeName === 'BR' ) nodes.pop();
 
-	if (nodes.length) {
-		replaceRangeWithNodes(editor, range, nodes);
+	if ( nodes.length ) {
+		replaceRangeWithNodes( editor, range, nodes );
 	}
-});
+} );
 
-editor.addEventListener('copy', e => {
-    const sel = document.getSelection();
-    if (!sel || sel.isCollapsed) return;
+editor.addEventListener( 'copy', e => {
+	const sel = document.getSelection();
+	if ( !sel || sel.isCollapsed ) return;
 
-    const fragment = sel.getRangeAt(0).cloneContents();
-    const tempDiv = document.createElement('div');
-    tempDiv.appendChild(fragment);
+	const fragment = sel.getRangeAt( 0 ).cloneContents();
+	const tempDiv = document.createElement( 'div' );
+	tempDiv.appendChild( fragment );
 
-    function getPlainText(node) {
-        if (node.nodeType === Node.TEXT_NODE) return node.textContent;
-        if (node.nodeType !== Node.ELEMENT_NODE) return '';
+	function getPlainText( node ) {
+		if ( node.nodeType === Node.TEXT_NODE ) return node.textContent;
+		if ( node.nodeType !== Node.ELEMENT_NODE ) return '';
 
-        // dataset.url を持つ最上位の親を探す
-        const urlAncestor = node.closest('[data-url]');
-        if (urlAncestor) {
-            // base64画像はそのままコピー
-            if (urlAncestor.tagName === 'IMG' && urlAncestor.src.startsWith('data:')) {
-                return urlAncestor.outerHTML;
-            }
-            return urlAncestor.dataset.url;
-        }
+		// dataset.url を持つ最上位の親を探す
+		const urlAncestor = node.closest( '[data-url]' );
+		if ( urlAncestor ) {
+			// base64画像はそのままコピー
+			if ( urlAncestor.tagName === 'IMG' && urlAncestor.src.startsWith( 'data:' ) ) {
+				return urlAncestor.outerHTML;
+			}
+			return urlAncestor.dataset.url;
+		}
 
-        // br は改行に変換
-        if (node.tagName === 'BR') return '\n';
+		// br は改行に変換
+		if ( node.tagName === 'BR' ) return '\n';
 
-        // blockquote や div も改行で区切る
-        const childrenText = Array.from(node.childNodes).map(getPlainText).join('');
-        if (['DIV', 'P', 'BLOCKQUOTE'].includes(node.tagName)) return childrenText + '\n';
-        return childrenText;
-    }
+		// blockquote や div も改行で区切る
+		const childrenText = Array.from( node.childNodes ).map( getPlainText ).join( '' );
+		if ( ['DIV', 'P', 'BLOCKQUOTE'].includes( node.tagName ) ) return childrenText + '\n';
+		return childrenText;
+	}
 
-    let plainText = getPlainText(tempDiv);
+	let plainText = getPlainText( tempDiv );
 
-    // 最後の余分な改行を削除
-    plainText = plainText.replace(/\n+$/g, '');
+	// 最後の余分な改行を削除
+	plainText = plainText.replace( /\n+$/g, '' );
 
-    e.preventDefault();
-    e.clipboardData.setData('text/plain', plainText);
-});
+	e.preventDefault();
+	e.clipboardData.setData( 'text/plain', plainText );
+} );
 
 editor.addEventListener( 'click', e => {
 	const a = e.target.closest( 'a' );
@@ -1471,7 +1545,7 @@ let requireDoubleTap = false; // ← ここ
 let lastTapTime = 0;
 
 editor.addEventListener( 'touchstart', e => {
-	 isTouchDevice = true;
+	isTouchDevice = true;
 	lastTouch = e.touches[0];   // ← ★この1行を追加
 	touchStartTime = Date.now();
 	touchMoved = false;
@@ -1494,44 +1568,44 @@ editor.addEventListener( 'touchmove', () => {
 	touchMoved = true;
 } );
 
-editor.addEventListener('touchend', () => {
-  // 🔒 リンクプレビュー後は何もしない
+editor.addEventListener( 'touchend', () => {
+	// 🔒 リンクプレビュー後は何もしない
 	if ( longPress ) return;
-	if (editor.contentEditable === 'true') return;
+	if ( editor.contentEditable === 'true' ) return;
 
-    if (requireDoubleTap) {
-        const now = Date.now();
-        if (now - lastTapTime < 300) {
-            enableEdit();
-        }
-        lastTapTime = now;
-        return;
-    }
+	if ( requireDoubleTap ) {
+		const now = Date.now();
+		if ( now - lastTapTime < 300 ) {
+			enableEdit();
+		}
+		lastTapTime = now;
+		return;
+	}
 
-    enableEdit();
-});
+	enableEdit();
+} );
 
 function enableEdit() {
-    // まず editable にする
-    editor.contentEditable = 'true';
-    requireDoubleTap = false;
+	// まず editable にする
+	editor.contentEditable = 'true';
+	requireDoubleTap = false;
 
-    // iOS / Android 対策：1フレーム遅らせる
-    requestAnimationFrame(() => {
-        if (lastTouch) {
-            const range = document.caretRangeFromPoint(
-                lastTouch.clientX,
-                lastTouch.clientY
-            );
-            if (range) {
-                const sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(range);
-            }
-        }
+	// iOS / Android 対策：1フレーム遅らせる
+	requestAnimationFrame( () => {
+		if ( lastTouch ) {
+			const range = document.caretRangeFromPoint(
+				lastTouch.clientX,
+				lastTouch.clientY
+			);
+			if ( range ) {
+				const sel = window.getSelection();
+				sel.removeAllRanges();
+				sel.addRange( range );
+			}
+		}
 
-        editor.focus({ preventScroll: true });
-    });
+		editor.focus( { preventScroll: true } );
+	} );
 }
 
 
@@ -1598,7 +1672,7 @@ document.getElementById( 'back-list' ).onclick = () => { location.hash = '#/list
 document.getElementById( 'back' ).onclick = () => { if ( history.length > 1 ) history.back(); else location.hash = '#/list'; }
 /* New memo button */
 document.getElementById( 'new-memo' ).onclick = async () => {
-	requireDoubleTap = false; 
+	requireDoubleTap = false;
 	await loadMetaOnce(); // ← 必ず先に呼ぶ
 	// 本文ドキュメントを1件だけ作る
 	const ref = await addDoc(
