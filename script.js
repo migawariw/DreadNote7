@@ -91,7 +91,12 @@ editor.addEventListener( 'mousedown', e => {
 	if ( isTouchDevice ) return;
 	// 長押しやリンククリックは除外
 	if ( e.target.closest( 'a' ) || e.target.closest( 'img' ) || e.target.closest( 'iframe' ) ) return;
-
+ if (!memoLoaded) {
+    // ロード中なら絶対に編集不可
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
 
 	// 右クリック無視
 	if ( e.button !== 0 ) return;
@@ -720,8 +725,10 @@ function loadTrash() {
 			trashList.appendChild( li );
 		} );
 }
-
+let memoLoaded =null;
 async function openEditor( id ) {
+	memoLoaded = false;
+  editor.contentEditable = false;
 
 	currentMemoId = id;
 
@@ -738,6 +745,7 @@ async function openEditor( id ) {
 }
 
 async function showEditor( data ) {
+	editor.contentEditable = false; // まずロード中は false
 	// 既存タイトルを本文の1行目に追加
 	const content = data.content || '';
 	// 改行を <div> に変換してセット
@@ -762,7 +770,12 @@ async function showEditor( data ) {
 
 	show( 'editor' );
 	window.scrollTo( 0, 0 );
-	// closeSidebar();
+	 
+// DOM更新完了後に編集可能にする
+  requestAnimationFrame(() => {
+    memoLoaded = true;
+    editor.contentEditable = true;
+  });
 }
 // --- タイムスタンプ更新関数 ---
 function updateTimestamp( memoId ) {
@@ -1577,6 +1590,10 @@ let lastTapTime = 0;
 
 editor.addEventListener( 'touchstart', e => {
 	isTouchDevice = true;
+	if (!memoLoaded) { 
+    e.preventDefault();  // ロード前は一切操作させない
+    return;
+  }
 	lastTouch = e.touches[0];   // ← ★この1行を追加
 	touchStartTime = Date.now();
 	touchMoved = false;
@@ -1602,6 +1619,7 @@ editor.addEventListener( 'touchmove', () => {
 editor.addEventListener( 'touchend', () => {
 	// 🔒 リンクプレビュー後は何もしない
 	if ( longPress ) return;
+	if (!memoLoaded) return;      // ← ロード完了前は無視
 	if ( editor.contentEditable === 'true' ) return;
 
 	if ( requireDoubleTap ) {
@@ -1617,6 +1635,7 @@ editor.addEventListener( 'touchend', () => {
 } );
 
 function enableEdit() {
+	if (memoLoaded !== true) return; // ← ロード前は編集不可
 	// まず editable にする
 	editor.contentEditable = 'true';
 	requireDoubleTap = false;
