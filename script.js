@@ -862,30 +862,61 @@ async function saveMemo() {
 			modal.style.minWidth = '300px';
 			modal.style.textAlign = 'center';
 			modal.style.zIndex = '10001';
+			modal.style.color = 'black';
 
 			const msg = document.createElement( 'p' );
-			msg.textContent = "他の端末で更新されています。\n\n" +
-				`この端末がメモを開いた時点での最終更新時刻:\n ${new Date( localUpdated ).toLocaleString()}\n\n` +
-				`サーバーには以下の日時のデータがあります。:\n ${new Date( serverData.updated ).toLocaleString()}\n\n`;
+			msg.textContent = "編集中のメモが他の画面でも更新されています。\n"
 				// "サーバー内容で上書き / 現在内容で上書き / 何もしない";
 			msg.style.whiteSpace = 'pre-wrap';
-
-			const btnServer = document.createElement( 'button' );
-			btnServer.textContent = 'サーバーで上書き';
 			const btnLocal = document.createElement( 'button' );
-			btnLocal.textContent = '現在内容で上書き';
+			btnLocal.textContent = `この画面の内容を保存\n（${new Date( localUpdated ).toLocaleString()}時点の内容を編集中）\n→別の画面の内容は消えます。\n`;
+			const btnServer = document.createElement( 'button' );
+			btnServer.textContent = `別の画面の内容を読み込む\n（${new Date( serverData.updated ).toLocaleString()}保存済み）\n→この画面の内容は消えます。\n`;
 			const btnNone = document.createElement( 'button' );
-			btnNone.textContent = '何もしない';
+			btnNone.textContent = '\n\n何もしない\n\n\n';
+			btnLocal.style.whiteSpace = 'pre-wrap';
+btnServer.style.whiteSpace = 'pre-wrap';
+btnNone.style.whiteSpace = 'pre-wrap';
 
 			btnServer.style.margin = '5px';
 			btnLocal.style.margin = '5px';
 			btnNone.style.margin = '5px';
 
+			btnServer.style.margin = '5px';
+btnServer.style.border = '2px solid #007bff';  // 枠の色と太さ
+btnServer.style.borderRadius = '4px';          // 角丸
+btnServer.style.padding = '8px 12px';          // 内側の余白
+btnServer.style.background = '#fff';           // 背景色
+btnServer.style.color = '#007bff';             // 文字色
+btnServer.style.cursor = 'pointer';           // ホバー時カーソル
+btnServer.onmouseover = () => btnServer.style.background = '#e6f0ff';
+btnServer.onmouseout = () => btnServer.style.background = '#fff';
+
+btnLocal.style.margin = '5px';
+btnLocal.style.border = '2px solid #28a745';
+btnLocal.style.borderRadius = '4px';
+btnLocal.style.padding = '8px 12px';
+btnLocal.style.background = '#fff';
+btnLocal.style.color = '#28a745';
+btnLocal.style.cursor = 'pointer';
+btnLocal.onmouseover = () => btnLocal.style.background = '#e6ffe6';
+btnLocal.onmouseout = () => btnLocal.style.background = '#fff';
+
+btnNone.style.margin = '5px';
+btnNone.style.border = '2px solid #6c757d';
+btnNone.style.borderRadius = '4px';
+btnNone.style.padding = '8px 12px';
+btnNone.style.background = '#fff';
+btnNone.style.color = '#6c757d';
+btnNone.style.cursor = 'pointer';
+btnNone.onmouseover = () => btnNone.style.background = '#f0f0f0';
+btnNone.onmouseout = () => btnNone.style.background = '#fff';
+
 			btnServer.onclick = () => { resolve( 'server' ); overlay.remove(); modal.remove(); };
 			btnLocal.onclick = () => { resolve( 'local' ); overlay.remove(); modal.remove(); };
 			btnNone.onclick = () => { resolve( 'none' ); overlay.remove(); modal.remove(); };
 
-			modal.append( msg, btnServer, btnLocal, btnNone );
+			modal.append(msg, btnLocal, document.createElement('br'), btnServer, document.createElement('br'), btnNone);
 			document.body.append( overlay, modal );
 		} );
 
@@ -894,7 +925,7 @@ if ( choice === 'server' ) {
     memoCache[currentMemoId] = serverData;
     showEditor(serverData);
     localUpdated = serverData.updated;
-    showToast("サーバー内容で更新しました");
+    showToast("別の画面の内容を読み込みました。");
     return;
 } else if ( choice === 'none' ) {
     // 何もしない → 処理終了
