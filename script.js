@@ -774,7 +774,7 @@ async function showEditor( data ) {
 // DOM更新完了後に編集可能にする
   requestAnimationFrame(() => {
     memoLoaded = true;
-    editor.contentEditable = true;
+    // editor.contentEditable = true;
   });
 }
 // --- タイムスタンプ更新関数 ---
