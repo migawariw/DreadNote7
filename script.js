@@ -91,12 +91,12 @@ editor.addEventListener( 'mousedown', e => {
 	if ( isTouchDevice ) return;
 	// 長押しやリンククリックは除外
 	if ( e.target.closest( 'a' ) || e.target.closest( 'img' ) || e.target.closest( 'iframe' ) ) return;
- if (!memoLoaded) {
-    // ロード中なら絶対に編集不可
-    e.preventDefault();
-    e.stopPropagation();
-    return;
-  }
+	if ( !memoLoaded ) {
+		// ロード中なら絶対に編集不可
+		e.preventDefault();
+		e.stopPropagation();
+		return;
+	}
 
 	// 右クリック無視
 	if ( e.button !== 0 ) return;
@@ -725,10 +725,10 @@ function loadTrash() {
 			trashList.appendChild( li );
 		} );
 }
-let memoLoaded =null;
+let memoLoaded = null;
 async function openEditor( id ) {
 	memoLoaded = false;
-  editor.contentEditable = false;
+	editor.contentEditable = false;
 
 	currentMemoId = id;
 
@@ -770,12 +770,12 @@ async function showEditor( data ) {
 
 	show( 'editor' );
 	window.scrollTo( 0, 0 );
-	 
-// DOM更新完了後に編集可能にする
-  requestAnimationFrame(() => {
-    memoLoaded = true;
-    // editor.contentEditable = true;
-  });
+
+	// DOM更新完了後に編集可能にする
+	requestAnimationFrame( () => {
+		memoLoaded = true;
+		// editor.contentEditable = true;
+	} );
 }
 // --- タイムスタンプ更新関数 ---
 function updateTimestamp( memoId ) {
@@ -864,23 +864,34 @@ async function saveMemo() {
 			overlay.style.zIndex = '10000';
 
 			// モーダル本体
+			// モーダル本体
 			const modal = document.createElement( 'div' );
 			modal.style.position = 'fixed';
 			modal.style.top = '50%';
 			modal.style.left = '50%';
 			modal.style.transform = 'translate(-50%, -50%)';
 			modal.style.background = '#fff';
-			modal.style.padding = '20px';
-			modal.style.borderRadius = '8px';
-			modal.style.minWidth = '300px';
-			modal.style.textAlign = 'center';
+			modal.style.padding = '24px 20px';
+			modal.style.borderRadius = '12px';
+			modal.style.width = '90%';
+			modal.style.maxWidth = '420px';
+			modal.style.boxShadow = '0 10px 30px rgba(0,0,0,0.25)';
 			modal.style.zIndex = '10001';
-			modal.style.color = 'black';
+			modal.style.color = '#000';
+			modal.style.textAlign = 'left';
 
+			// タイトル
+			const title = document.createElement( 'h3' );
+			title.textContent = '⚠ 他の画面で更新されています';
+			title.style.margin = '0 0 8px';
+			title.style.fontSize = '16px';
+
+			// 説明文
 			const msg = document.createElement( 'p' );
-			msg.textContent = "編集中のメモが他の画面でも更新されています。\n"
-			// "サーバー内容で上書き / 現在内容で上書き / 何もしない";
-			msg.style.whiteSpace = 'pre-wrap';
+			msg.textContent = 'どちらの内容を使いますか？';
+			msg.style.margin = '0 0 16px';
+			msg.style.fontSize = '14px';
+			msg.style.color = '#333';
 			const btnLocal = document.createElement( 'button' );
 			btnLocal.textContent = `この画面の内容を保存\n（${new Date( localUpdated ).toLocaleString()}時点の内容を編集中）\n→別の画面の内容は消えます。\n`;
 			const btnServer = document.createElement( 'button' );
@@ -890,46 +901,42 @@ async function saveMemo() {
 			btnLocal.style.whiteSpace = 'pre-wrap';
 			btnServer.style.whiteSpace = 'pre-wrap';
 			btnNone.style.whiteSpace = 'pre-wrap';
-
-			btnServer.style.margin = '5px';
-			btnLocal.style.margin = '5px';
-			btnNone.style.margin = '5px';
-
-			btnServer.style.margin = '5px';
-			btnServer.style.border = '2px solid #007bff';  // 枠の色と太さ
-			btnServer.style.borderRadius = '4px';          // 角丸
-			btnServer.style.padding = '8px 12px';          // 内側の余白
-			btnServer.style.background = '#fff';           // 背景色
-			btnServer.style.color = '#007bff';             // 文字色
-			btnServer.style.cursor = 'pointer';           // ホバー時カーソル
-			btnServer.onmouseover = () => btnServer.style.background = '#e6f0ff';
-			btnServer.onmouseout = () => btnServer.style.background = '#fff';
-
-			btnLocal.style.margin = '5px';
+			function styleButton( btn ) {
+				btn.style.display = 'block';
+				btn.style.width = '100%';
+				btn.style.textAlign = 'left';
+				btn.style.padding = '12px 14px';
+				btn.style.margin = '8px 0';
+				btn.style.borderRadius = '8px';
+				btn.style.fontSize = '14px';
+				btn.style.cursor = 'pointer';
+			}
+			styleButton( btnLocal );
 			btnLocal.style.border = '2px solid #28a745';
-			btnLocal.style.borderRadius = '4px';
-			btnLocal.style.padding = '8px 12px';
-			btnLocal.style.background = '#fff';
-			btnLocal.style.color = '#28a745';
-			btnLocal.style.cursor = 'pointer';
-			btnLocal.onmouseover = () => btnLocal.style.background = '#e6ffe6';
-			btnLocal.onmouseout = () => btnLocal.style.background = '#fff';
-
-			btnNone.style.margin = '5px';
-			btnNone.style.border = '2px solid #6c757d';
-			btnNone.style.borderRadius = '4px';
-			btnNone.style.padding = '8px 12px';
+			btnLocal.style.background = '#f6fff8';
+			btnLocal.style.color = '#155724';
+			btnLocal.innerHTML =
+				`<strong>この画面の内容を保存</strong><br>
+   <small>${new Date( localUpdated ).toLocaleString()} から編集中</small><br>
+   <small>※他の画面の保存内容は消えます</small>`;
+			styleButton( btnServer );
+			btnServer.style.border = '2px solid #007bff';
+			btnServer.style.background = '#f4f9ff';
+			btnServer.style.color = '#004085';
+			btnServer.innerHTML =
+				`<strong>別の画面の内容を読み込む</strong><br>
+   <small>${new Date( serverData.updated ).toLocaleString()} に保存済み</small><br>
+   <small>※この画面の内容は消えます</small>`;
+			styleButton( btnNone );
+			btnNone.style.border = '1px solid #ccc';
 			btnNone.style.background = '#fff';
-			btnNone.style.color = '#6c757d';
-			btnNone.style.cursor = 'pointer';
-			btnNone.onmouseover = () => btnNone.style.background = '#f0f0f0';
-			btnNone.onmouseout = () => btnNone.style.background = '#fff';
-
+			btnNone.style.color = '#555';
+			btnNone.innerHTML = `<br><strong>今は何もしない</strong><br>　`;
 			btnServer.onclick = () => { resolve( 'server' ); overlay.remove(); modal.remove(); };
 			btnLocal.onclick = () => { resolve( 'local' ); overlay.remove(); modal.remove(); };
 			btnNone.onclick = () => { resolve( 'none' ); overlay.remove(); modal.remove(); };
 
-			modal.append( msg, btnLocal, document.createElement( 'br' ), btnServer, document.createElement( 'br' ), btnNone );
+			modal.append( title, msg, btnLocal, btnServer, btnNone );
 			document.body.append( overlay, modal );
 		} );
 
@@ -1590,10 +1597,10 @@ let lastTapTime = 0;
 
 editor.addEventListener( 'touchstart', e => {
 	isTouchDevice = true;
-	if (!memoLoaded) { 
-    e.preventDefault();  // ロード前は一切操作させない
-    return;
-  }
+	if ( !memoLoaded ) {
+		e.preventDefault();  // ロード前は一切操作させない
+		return;
+	}
 	lastTouch = e.touches[0];   // ← ★この1行を追加
 	touchStartTime = Date.now();
 	touchMoved = false;
@@ -1619,7 +1626,7 @@ editor.addEventListener( 'touchmove', () => {
 editor.addEventListener( 'touchend', () => {
 	// 🔒 リンクプレビュー後は何もしない
 	if ( longPress ) return;
-	if (!memoLoaded) return;      // ← ロード完了前は無視
+	if ( !memoLoaded ) return;      // ← ロード完了前は無視
 	if ( editor.contentEditable === 'true' ) return;
 
 	if ( requireDoubleTap ) {
@@ -1635,7 +1642,7 @@ editor.addEventListener( 'touchend', () => {
 } );
 
 function enableEdit() {
-	if (memoLoaded !== true) return; // ← ロード前は編集不可
+	if ( memoLoaded !== true ) return; // ← ロード前は編集不可
 	// まず editable にする
 	editor.contentEditable = 'true';
 	requireDoubleTap = false;
